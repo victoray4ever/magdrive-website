@@ -26,15 +26,17 @@ function showAdminPanel() {
   renderAdminPanel();
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   const errorEl = document.getElementById('loginError');
-  if (DataManager.login(username, password)) {
+  errorEl.textContent = '';
+  const result = await DataManager.login(username, password);
+  if (result.success) {
     showAdminPanel();
   } else {
-    errorEl.textContent = '用户名或密码错误，请重试';
+    errorEl.textContent = result.message || '用户名或密码错误，请重试';
   }
 }
 
@@ -60,10 +62,11 @@ function renderAdminPanel() {
 
   panel.innerHTML = `
     <div class="admin-topbar" ${headerBg ? 'style="background:' + headerBg + ';"' : ''}>
-      <h1>${logoHtml}管理后台 - 轴承产品展示</h1>
+      <h1>${logoHtml}管理后台 - 迈德瑞智能装备科技</h1>
       <div class="actions">
         ${serverBadge}
         <a href="index.html" class="btn-view-site" target="_blank">查看前台</a>
+        <button onclick="openPasswordModal()" class="btn-change-pwd" title="修改后台管理员登录密码" style="padding:7px 14px;background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">🔑 修改密码</button>
         <button onclick="handleResetDefaults()" class="btn-reset-defaults" title="重置回初始设置">恢复默认</button>
         <button onclick="handleLogout()" class="btn-logout">退出登录</button>
       </div>
@@ -702,5 +705,91 @@ function closeCropModal() {
     cropperInstance = null;
   }
   cropCallback = null;
+}
+
+// ===== 修改密码模态弹窗控制 =====
+function openPasswordModal() {
+  const modal = document.getElementById('passwordModal');
+  const errorEl = document.getElementById('pwdErrorMsg');
+  const form = document.getElementById('changePasswordForm');
+  if (modal) {
+    if (form) form.reset();
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.style.display = 'none';
+    }
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      document.getElementById('oldPassword').focus();
+    }, 100);
+  }
+}
+
+function closePasswordModal() {
+  const modal = document.getElementById('passwordModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const oldPwd = document.getElementById('oldPassword').value.trim();
+  const newPwd = document.getElementById('newPassword').value.trim();
+  const confirmPwd = document.getElementById('confirmPassword').value.trim();
+  const errorEl = document.getElementById('pwdErrorMsg');
+  const submitBtn = document.getElementById('btnSubmitPwd');
+
+  if (errorEl) {
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
+  }
+
+  if (newPwd.length < 6) {
+    if (errorEl) {
+      errorEl.textContent = '新密码长度至少需要 6 个字符';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    if (errorEl) {
+      errorEl.textContent = '两次输入的新密码不一致，请核对';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = '正在修改...';
+  }
+
+  try {
+    const res = await DataManager.changePassword(oldPwd, newPwd);
+    closePasswordModal();
+    showToast(res.message || '🎉 密码修改成功！请重新登录');
+    
+    // 延迟 1.5 秒登出并提示重新登录
+    setTimeout(() => {
+      handleLogout();
+      const loginErr = document.getElementById('loginError');
+      if (loginErr) {
+        loginErr.style.color = '#15803d';
+        loginErr.textContent = '密码已修改成功，请使用新密码登录';
+      }
+    }, 1500);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = err.message || '修改失败，请重试';
+      errorEl.style.display = 'block';
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '确认修改';
+    }
+  }
 }
 

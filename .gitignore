@@ -29,3 +29,4 @@ website/images/ppt_media/
 .vscode/
 .idea/
 *.rar
+website/data/admin.json

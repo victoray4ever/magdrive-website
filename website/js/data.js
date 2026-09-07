@@ -49,14 +49,14 @@ const DataManager = {
   ADMIN_USER: "admin",
   ADMIN_PASS: "123",
 
-  // localStorage 键名
   KEYS: {
     version: "bearing_data_ver",
     content: "bearing_content_overrides",
     images: "bearing_image_overrides",
     counts: "bearing_image_counts",
     session: "bearing_admin_session",
-    inquiries: "bearing_offline_inquiries"
+    inquiries: "bearing_offline_inquiries",
+    password: "bearing_admin_password"
   },
 
   // 核心展示板块
@@ -518,14 +518,66 @@ const DataManager = {
     return { success: true, message: "已恢复出厂默认设置" };
   },
 
-  // ===== 管理员认证 =====
-  login(username, password) {
-    if (username === this.ADMIN_USER && password === this.ADMIN_PASS) {
+  // ===== 管理员认证与登录 =====
+  async login(username, password) {
+    if (this._hasBackend) {
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          sessionStorage.setItem(this.KEYS.session, data.token);
+          return { success: true, message: data.message };
+        }
+        return { success: false, message: data.message || "用户名或密码错误" };
+      } catch (e) {
+        console.warn("服务端登录接口异常，尝试本地凭据", e);
+      }
+    }
+
+    // 离线/纯静态环境登录校验
+    const localPass = localStorage.getItem(this.KEYS.password) || this.ADMIN_PASS;
+    if (username === this.ADMIN_USER && password === localPass) {
       const token = "token_" + Date.now() + "_" + Math.random().toString(36).substr(2);
       sessionStorage.setItem(this.KEYS.session, token);
-      return true;
+      return { success: true, message: "登录成功" };
     }
-    return false;
+    return { success: false, message: "用户名或密码错误，请重试" };
+  },
+
+  // ===== 修改管理员密码 =====
+  async changePassword(oldPassword, newPassword) {
+    if (this._hasBackend) {
+      try {
+        const res = await fetch("/api/change-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ old_password: oldPassword, new_password: newPassword })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message || "修改密码失败");
+        }
+        localStorage.setItem(this.KEYS.password, newPassword);
+        return data;
+      } catch (e) {
+        throw e;
+      }
+    } else {
+      // 离线静态模式
+      const currentPass = localStorage.getItem(this.KEYS.password) || this.ADMIN_PASS;
+      if (oldPassword !== currentPass) {
+        throw new Error("当前原密码不正确，请重新输入");
+      }
+      if (!newPassword || newPassword.length < 6) {
+        throw new Error("新密码长度不能少于6位");
+      }
+      localStorage.setItem(this.KEYS.password, newPassword);
+      return { success: true, message: "密码修改成功！请使用新密码重新登录" };
+    }
   },
 
   isLoggedIn() {

@@ -153,6 +153,8 @@ $$\text{优先级} = \text{localStorage(本地覆盖)} \longrightarrow \text{con
 
 | 接口地址 | 请求方式 | 请求体 / 参数 | 返回格式 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
+| `/api/login` | `POST` | `{"username": "...", "password": "..."}` | `{"success": true, "token": "..."}` | 管理员登录认证与获取会话令牌 |
+| `/api/change-password` | `POST` | `{"old_password": "...", "new_password": "..."}` | `{"success": true, "message": "..."}` | 校验原密码并持久化更新管理员密码 |
 | `/api/status` | `GET` | 无 | `{"has_backend": true}` | 探测服务端连通性 |
 | `/api/save-content` | `POST` | `{"csv": "CSV文本内容"}` | `{"success": true, "message": "..."}` | 覆盖保存全站 content.csv |
 | `/api/save-image` | `POST` | `{"filename": "...", "base64": "..."}` | `{"success": true, "url": "images/..."}` | 解码并落盘保存图片文件 |

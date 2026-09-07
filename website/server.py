@@ -23,6 +23,22 @@ DATA_DIR = os.path.join(DIRECTORY, "data")
 IMAGES_DIR = os.path.join(DIRECTORY, "images")
 INQUIRIES_FILE = os.path.join(DATA_DIR, "inquiries.json")
 CONTENT_FILE = os.path.join(DATA_DIR, "content.csv")
+ADMIN_FILE = os.path.join(DATA_DIR, "admin.json")
+
+def get_admin_credentials():
+    """获取管理员账号密码，若不存在则初始化默认账号"""
+    if os.path.exists(ADMIN_FILE):
+        try:
+            with open(ADMIN_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"username": "admin", "password": "123"}
+
+def save_admin_credentials(creds):
+    """保存管理员账号密码到磁盘"""
+    with open(ADMIN_FILE, "w", encoding="utf-8") as f:
+        json.dump(creds, f, ensure_ascii=False, indent=2)
 
 # 确保目录存在
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -121,6 +137,39 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path_only = self.path.split("?")[0]
+
+        # API 路由: 管理员登录认证
+        if path_only == "/api/login":
+            data = self.read_json_body()
+            username = data.get("username", "").strip()
+            password = data.get("password", "").strip()
+            creds = get_admin_credentials()
+            if username == creds.get("username") and password == creds.get("password"):
+                token = f"token_{uuid.uuid4().hex}"
+                print(f"[API Auth] 用户 {username} 登录成功")
+                self.send_json(200, {"success": True, "token": token, "message": "登录成功"})
+            else:
+                print(f"[API Auth] 用户 {username} 登录失败: 密码错误")
+                self.send_json(401, {"success": False, "message": "用户名或密码错误，请重试"})
+            return
+
+        # API 路由: 修改管理员密码
+        if path_only == "/api/change-password":
+            data = self.read_json_body()
+            old_password = data.get("old_password", "").strip()
+            new_password = data.get("new_password", "").strip()
+            creds = get_admin_credentials()
+            if old_password != creds.get("password"):
+                self.send_json(400, {"success": False, "message": "当前原密码不正确，请重新输入"})
+                return
+            if not new_password or len(new_password) < 6:
+                self.send_json(400, {"success": False, "message": "新密码长度不能少于6位"})
+                return
+            creds["password"] = new_password
+            save_admin_credentials(creds)
+            print(f"[API Auth] 管理员密码已成功修改")
+            self.send_json(200, {"success": True, "message": "密码修改成功！请使用新密码重新登录"})
+            return
 
         # API 路由: 保存 content.csv
         if path_only == "/api/save-content":
