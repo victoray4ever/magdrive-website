@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>迈德瑞（淮安）智能装备科技有限公司 - MagDrive 精密轴承与智能装备</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 网站顶部导航 -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo">
+        <img src="images/logo.png" alt="MagDrive Logo" class="logo-img-el" style="max-height:36px;max-width:40px;object-fit:contain;border-radius:4px;">
+        <span class="logo-text" id="siteTitle">迈德瑞（淮安）智能装备科技有限公司</span>
+      </div>
+      <nav class="nav" id="desktopNav">
+        <a href="#product">产品展示</a>
+        <a href="#performance">性能参数</a>
+        <a href="#usage">使用方法</a>
+        <a href="#application">应用工况</a>
+        <a href="#contact">联系我们</a>
+      </nav>
+      <div class="header-actions">
+        <a href="admin.html" class="admin-link">管理后台</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="切换菜单">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 移动端侧边抽屉导航 -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-nav-header">
+      <span class="mobile-nav-title">网站导航</span>
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="关闭菜单">&times;</button>
+    </div>
+    <nav class="mobile-nav-links" id="mobileNavLinks">
+      <!-- 由 main.js 动态渲染 -->
+    </nav>
+    <div class="mobile-nav-footer">
+      <a href="admin.html" class="mobile-admin-link">进入管理后台</a>
+    </div>
+  </aside>
+
+  <!-- 顶部 Hero 区域 -->
+  <section class="hero" id="heroSection">
+    <div class="hero-container">
+      <div class="hero-grid">
+        <!-- 左侧核心文案与行动导引 -->
+        <div class="hero-left">
+          <div class="hero-pre-title">
+            <span class="pulse-dot"></span>
+            <span>2026 淮安市高端人才精英赛答辩项目 · 能源核心装备国产替代</span>
+          </div>
+          <h1 id="heroTitle" class="hero-main-title">面向熔盐与液态金属输送的<br><span class="gradient-text">高温磁力泵关键装备</span>研发及产业化</h1>
+          <p id="heroSubtitle" class="hero-sub-title">攻克 850℃ 超高温无磁钢驱动、金属-陶瓷复合轴承（国家发明专利 CN121382800A）与全静密封零泄漏核心技术，为光热储能、先进核能及高端化工提供本质安全动力保障。</p>
+          
+          <div class="hero-badges">
+            <span class="hero-badge">🔥 突破 850℃ 耐温极限</span>
+            <span class="hero-badge">🛡️ 全静密封 零泄漏</span>
+            <span class="hero-badge">📜 发明专利复合轴承</span>
+            <span class="hero-badge">⚡ 轴长 1.5m 替代 20m</span>
+          </div>
+
+          <div class="hero-actions">
+            <a href="#tech" class="btn btn-primary">🌟 探索核心技术</a>
+            <a href="#compare" class="btn btn-secondary">📊 参数对标国际巨头</a>
+            <a href="#contact" class="btn btn-outline">📋 工况在线选型</a>
+          </div>
+        </div>
+
+        <!-- 右侧装备三维透视交互展示卡片 -->
+        <div class="hero-right">
+          <div class="hero-card-showcase" id="heroCardShowcase" title="点击查看高清装备模型大图">
+            <div class="hero-card-glow"></div>
+            <img src="images/hero_pump_3d.png" alt="高温磁力泵关键装备" class="hero-pump-img">
+            <div class="hero-floating-tag tag-top">
+              <span class="tag-icon">⚡</span>
+              <span>轴长仅 1.5m · 告别 20m 传统长轴</span>
+            </div>
+            <div class="hero-floating-tag tag-bottom">
+              <span class="tag-icon">🏆</span>
+              <span>金属-陶瓷复合轴承 · 寿命提升 10 倍</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 五大核心关键指标数据看板 -->
+      <div class="hero-stats-strip">
+        <div class="stat-item">
+          <div class="stat-val">850<span class="stat-unit">℃</span></div>
+          <div class="stat-label">突破行业耐温极限</div>
+          <div class="stat-sub">传统磁力泵极限≤350℃</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">0<span class="stat-unit">泄漏</span></div>
+          <div class="stat-label">全静密封本质安全</div>
+          <div class="stat-sub">从源头杜绝高温介质起火</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">10<span class="stat-unit">倍+</span></div>
+          <div class="stat-label">复合轴承耐磨寿命</div>
+          <div class="stat-sub">发明专利 CN121382800A</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">80<span class="stat-unit">%↓</span></div>
+          <div class="stat-label">高温合金用量节约</div>
+          <div class="stat-sub">整机造价降低 50% 以上</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">23<span class="stat-unit">台+</span></div>
+          <div class="stat-label">国家级院所供货实绩</div>
+          <div class="stat-sub">中国原子能院/中科院/中广核</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页面主体板块 -->
+  <main id="mainContent">
+    <!-- 各大核心板块与联系我们由 main.js 动态渲染 -->
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="site-footer">
+    <p id="footerText">&copy; 2026 精密轴承产品展示中心. All Rights Reserved.</p>
+  </footer>
+
+  <!-- 大图画廊预览 Lightbox 模态框 -->
+  <div class="lightbox-modal" id="lightboxModal" aria-hidden="true">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-container">
+      <button class="lightbox-close" id="lightboxClose" title="关闭 (Esc)">&times;</button>
+      <button class="lightbox-arrow lightbox-prev" id="lightboxPrev" title="上一张 (←)">&#10094;</button>
+      <div class="lightbox-inner">
+        <div class="lightbox-image-wrap">
+          <img src="" alt="" id="lightboxImg" class="lightbox-img">
+        </div>
+        <div class="lightbox-info">
+          <div class="lightbox-text">
+            <h3 id="lightboxTitle"></h3>
+            <p id="lightboxDesc"></p>
+          </div>
+          <span id="lightboxCounter" class="lightbox-counter">1 / 1</span>
+        </div>
+      </div>
+      <button class="lightbox-arrow lightbox-next" id="lightboxNext" title="下一张 (→)">&#10095;</button>
+    </div>
+  </div>
+
+  <!-- 回到顶部浮动按钮 -->
+  <button class="back-to-top" id="backToTop" title="回到顶部" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+

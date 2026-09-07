@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 320" width="500" height="320">
+  <rect width="500" height="320" fill="#ffffff"/>
+  <text x="250" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#37474f" font-weight="bold">润滑保养方法</text>
+  <!-- Left: Lubrication types -->
+  <rect x="20" y="45" width="220" height="260" rx="8" fill="#f5f5f5" stroke="#cfd8dc" stroke-width="1.5"/>
+  <text x="130" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#37474f" font-weight="bold">润滑方式</text>
+  <!-- Grease -->
+  <circle cx="50" cy="100" r="8" fill="#ffc107"/>
+  <text x="70" y="105" font-family="Arial,sans-serif" font-size="12" fill="#37474f">润滑脂 - 通用场合</text>
+  <text x="70" y="120" font-family="Arial,sans-serif" font-size="10" fill="#78909c">填充量: 内部空间 1/2~2/3</text>
+  <!-- Oil -->
+  <circle cx="50" cy="145" r="8" fill="#42a5f5"/>
+  <text x="70" y="150" font-family="Arial,sans-serif" font-size="12" fill="#37474f">润滑油 - 高速场合</text>
+  <text x="70" y="165" font-family="Arial,sans-serif" font-size="10" fill="#78909c">油位: 最低滚子中心</text>
+  <!-- Solid -->
+  <circle cx="50" cy="190" r="8" fill="#66bb6a"/>
+  <text x="70" y="195" font-family="Arial,sans-serif" font-size="12" fill="#37474f">固体润滑 - 特殊环境</text>
+  <text x="70" y="210" font-family="Arial,sans-serif" font-size="10" fill="#78909c">适用: 高温/真空/腐蚀</text>
+  <!-- Right: Maintenance schedule -->
+  <rect x="260" y="45" width="220" height="260" rx="8" fill="#f5f5f5" stroke="#cfd8dc" stroke-width="1.5"/>
+  <text x="370" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#37474f" font-weight="bold">保养周期</text>
+  <!-- Timeline items -->
+  <line x1="300" y1="95" x2="300" y2="285" stroke="#cfd8dc" stroke-width="2"/>
+  <circle cx="300" cy="105" r="6" fill="#e53935"/>
+  <text x="315" y="100" font-family="Arial,sans-serif" font-size="11" fill="#37474f" font-weight="bold">每日</text>
+  <text x="315" y="115" font-family="Arial,sans-serif" font-size="10" fill="#78909c">检查温度/振动/噪音</text>
+  <circle cx="300" cy="145" r="6" fill="#ff9800"/>
+  <text x="315" y="140" font-family="Arial,sans-serif" font-size="11" fill="#37474f" font-weight="bold">每周</text>
+  <text x="315" y="155" font-family="Arial,sans-serif" font-size="10" fill="#78909c">检查密封件/润滑状态</text>
+  <circle cx="300" cy="185" r="6" fill="#2196f3"/>
+  <text x="315" y="180" font-family="Arial,sans-serif" font-size="11" fill="#37474f" font-weight="bold">每月</text>
+  <text x="315" y="195" font-family="Arial,sans-serif" font-size="10" fill="#78909c">补充润滑剂</text>
+  <circle cx="300" cy="225" r="6" fill="#4caf50"/>
+  <text x="315" y="220" font-family="Arial,sans-serif" font-size="11" fill="#37474f" font-weight="bold">每季</text>
+  <text x="315" y="235" font-family="Arial,sans-serif" font-size="10" fill="#78909c">全面检查/更换润滑</text>
+  <circle cx="300" cy="265" r="6" fill="#9c27b0"/>
+  <text x="315" y="260" font-family="Arial,sans-serif" font-size="11" fill="#37474f" font-weight="bold">每年</text>
+  <text x="315" y="275" font-family="Arial,sans-serif" font-size="10" fill="#78909c">全面检修/轴承更换</text>
+</svg>

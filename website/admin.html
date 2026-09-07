@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 - 迈德瑞智能装备科技</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cropper.min.css">
+</head>
+<body>
+  <!-- 登录面板 -->
+  <div id="loginPanel" class="login-panel">
+    <div class="login-card">
+      <div style="margin-bottom:16px;">
+        <img src="images/logo.png" alt="MagDrive Logo" style="width:64px;height:64px;object-fit:contain;border-radius:8px;">
+      </div>
+      <h1>迈德瑞管理后台登录</h1>
+      <form id="loginForm">
+        <input type="text" id="username" placeholder="用户名" autocomplete="off" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <button type="submit">登录</button>
+      </form>
+      <div id="loginError" class="login-error"></div>
+      <a href="index.html" class="back-link">&larr; 返回首页</a>
+    </div>
+  </div>
+
+  <!-- 管理面板（登录后显示） -->
+  <div id="adminPanel" class="admin-panel" style="display:none;"></div>
+
+  <!-- 图片裁剪弹窗 -->
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-modal">
+      <h3>裁剪图片</h3>
+      <div class="crop-hint">拖动裁剪框选择区域，可自由调整大小和位置，然后点击「确认裁剪」</div>
+      <div class="crop-aspect-btns">
+        <button class="crop-aspect-btn active" onclick="setCropAspect(null,this)">自由</button>
+        <button class="crop-aspect-btn" onclick="setCropAspect(1.5,this)">3:2</button>
+        <button class="crop-aspect-btn" onclick="setCropAspect(1,this)">1:1</button>
+        <button class="crop-aspect-btn" onclick="setCropAspect(0.75,this)">3:4</button>
+        <button class="crop-aspect-btn" onclick="setCropAspect(2.5,this)">5:2</button>
+      </div>
+      <div class="crop-image-container">
+        <img id="cropImage" src="" alt="裁剪图片">
+      </div>
+      <div class="crop-toolbar">
+        <button class="crop-btn-cancel" onclick="closeCropModal()">取消</button>
+        <button class="crop-btn-confirm" onclick="confirmCrop()">确认裁剪</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/cropper.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

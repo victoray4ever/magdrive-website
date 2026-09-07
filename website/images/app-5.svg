@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bgMt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d84315"/>
+      <stop offset="50%" stop-color="#bf360c"/>
+      <stop offset="100%" stop-color="#4e342e"/>
+    </linearGradient>
+    <radialGradient id="glowMt" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ff8a65" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#d84315" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bgMt)"/>
+  <rect width="400" height="300" fill="url(#glowMt)"/>
+  <!-- Furnace structure -->
+  <rect x="120" y="80" width="160" height="160" fill="#3e2723" stroke="#1b0000" stroke-width="3" rx="5"/>
+  <!-- Furnace opening (glowing) -->
+  <rect x="145" y="105" width="110" height="80" fill="#ff6f00" rx="3"/>
+  <rect x="145" y="105" width="110" height="80" fill="url(#glowMt)" rx="3"/>
+  <!-- Molten metal glow -->
+  <ellipse cx="200" cy="180" rx="40" ry="8" fill="#ffab40" opacity="0.8"/>
+  <!-- Heat waves -->
+  <path d="M 155 95 Q 160 85 155 75 Q 150 65 155 55" fill="none" stroke="#ff8a65" stroke-width="2" opacity="0.5"/>
+  <path d="M 200 95 Q 205 85 200 75 Q 195 65 200 55" fill="none" stroke="#ff8a65" stroke-width="2" opacity="0.6"/>
+  <path d="M 245 95 Q 250 85 245 75 Q 240 65 245 55" fill="none" stroke="#ff8a65" stroke-width="2" opacity="0.5"/>
+  <!-- Pipes -->
+  <rect x="100" y="140" width="25" height="12" fill="#5d4037" stroke="#3e2723" stroke-width="1" rx="2"/>
+  <rect x="275" y="140" width="25" height="12" fill="#5d4037" stroke="#3e2723" stroke-width="1" rx="2"/>
+  <!-- Control panel -->
+  <rect x="150" y="195" width="100" height="35" fill="#4e342e" rx="3"/>
+  <!-- Gauge -->
+  <circle cx="175" cy="212" r="10" fill="#1b0000" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="175" y1="212" x2="180" y2="208" stroke="#ff6f00" stroke-width="2"/>
+  <!-- Buttons -->
+  <circle cx="200" cy="210" r="4" fill="#e53935"/>
+  <circle cx="215" cy="210" r="4" fill="#43a047"/>
+  <circle cx="230" cy="210" r="4" fill="#ffc107"/>
+  <rect x="198" y="220" width="40" height="5" fill="#6d4c41" rx="1"/>
+  <!-- Support legs -->
+  <rect x="130" y="240" width="15" height="20" fill="#3e2723"/>
+  <rect x="255" y="240" width="15" height="20" fill="#3e2723"/>
+  <!-- Sparks -->
+  <circle cx="170" cy="120" r="2" fill="#ffeb3b"/>
+  <circle cx="190" cy="115" r="1.5" fill="#ffeb3b"/>
+  <circle cx="210" cy="118" r="2" fill="#ffca28"/>
+  <circle cx="230" cy="125" r="1.5" fill="#ffeb3b"/>
+  <text x="200" y="285" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#ffccbc" font-weight="bold">冶金设备</text>
+</svg>

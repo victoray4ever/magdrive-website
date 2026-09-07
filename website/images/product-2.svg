@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8f0f8"/>
+      <stop offset="100%" stop-color="#c5d5e5"/>
+    </linearGradient>
+    <linearGradient id="cone2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eceff1"/>
+      <stop offset="50%" stop-color="#b0bec5"/>
+      <stop offset="100%" stop-color="#607d8b"/>
+    </linearGradient>
+    <linearGradient id="ring2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#cfd8dc"/>
+      <stop offset="50%" stop-color="#90a4ae"/>
+      <stop offset="100%" stop-color="#546e7a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg2)"/>
+  <!-- Outer ring (tapered) -->
+  <path d="M 120 80 L 280 120 L 280 180 L 120 220 Z" fill="url(#ring2)" stroke="#37474f" stroke-width="2"/>
+  <!-- Inner ring (tapered) -->
+  <path d="M 150 100 L 250 130 L 250 170 L 150 200 Z" fill="url(#ring2)" stroke="#37474f" stroke-width="2"/>
+  <!-- Rollers (tapered) -->
+  <polygon points="135,95 165,105 158,120 128,110" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <polygon points="190,107 220,117 213,132 183,122" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <polygon points="245,119 265,127 258,142 238,134" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <polygon points="245,173 265,181 258,196 238,188" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <polygon points="190,168 220,178 213,193 183,183" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <polygon points="135,180 165,190 158,205 128,195" fill="url(#cone2)" stroke="#546e7a" stroke-width="1"/>
+  <!-- Center axis -->
+  <line x1="100" y1="150" x2="300" y2="150" stroke="#37474f" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="200" y="280" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#37474f" font-weight="bold">圆锥滚子轴承</text>
+</svg>

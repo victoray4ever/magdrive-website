@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bgR" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a237e"/>
+      <stop offset="100%" stop-color="#283593"/>
+    </linearGradient>
+    <linearGradient id="armR" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#42a5f5"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bgR)"/>
+  <!-- Floor line -->
+  <line x1="0" y1="250" x2="400" y2="250" stroke="#3949ab" stroke-width="2"/>
+  <!-- Robot base -->
+  <rect x="170" y="230" width="60" height="20" fill="#546e7a" rx="3"/>
+  <!-- Robot column -->
+  <rect x="185" y="180" width="30" height="55" fill="#78909c" rx="2"/>
+  <!-- Joint 1 (shoulder) -->
+  <circle cx="200" cy="180" r="12" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+  <!-- Upper arm -->
+  <rect x="195" y="110" width="10" height="75" fill="url(#armR)" rx="2"/>
+  <!-- Joint 2 (elbow) -->
+  <circle cx="200" cy="110" r="10" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+  <!-- Forearm -->
+  <rect x="200" y="105" width="70" height="10" fill="url(#armR)" rx="2" transform="rotate(-20 200 110)"/>
+  <!-- Joint 3 (wrist) -->
+  <circle cx="262" cy="88" r="8" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+  <!-- End effector (gripper) -->
+  <rect x="255" y="75" width="15" height="18" fill="#90a4ae" rx="2"/>
+  <rect x="253" y="73" width="4" height="12" fill="#546e7a"/>
+  <rect x="268" y="73" width="4" height="12" fill="#546e7a"/>
+  <!-- Part being assembled -->
+  <rect x="100" y="235" width="40" height="15" fill="#ffc107" stroke="#f57f17" stroke-width="1" rx="2"/>
+  <!-- Grid lines on floor (perspective) -->
+  <line x1="0" y1="260" x2="400" y2="260" stroke="#3949ab" stroke-width="1" opacity="0.5"/>
+  <line x1="0" y1="270" x2="400" y2="270" stroke="#3949ab" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="280" x2="400" y2="280" stroke="#3949ab" stroke-width="1" opacity="0.2"/>
+  <!-- Highlight glow -->
+  <circle cx="200" cy="180" r="30" fill="#42a5f5" opacity="0.1"/>
+  <text x="200" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#ffffff" font-weight="bold">工业机器人</text>
+</svg>

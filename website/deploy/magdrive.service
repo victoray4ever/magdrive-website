@@ -1,0 +1,16 @@
+[Unit]
+Description=MagDrive High-Temp Magnetic Pump Website Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/magdrive
+ExecStart=/usr/bin/python3 /var/www/magdrive/server.py 8090
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
