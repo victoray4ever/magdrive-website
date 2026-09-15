@@ -1,64 +1,128 @@
-section,field,value
+﻿section,field,value
 meta,site_title,迈德瑞（淮安）智能装备科技有限公司
-meta,site_subtitle,MagDrive · 面向熔盐与液态金属输送的高温磁力泵关键装备研发与产业化
+meta,site_subtitle,MagDrive · 面向熔盐与液态金属输送的高温磁力泵
 meta,header_bg_color,#0a2540
 meta,hero_bg_color,#0d3880
 meta,hero_title_color,#ffffff
-meta,nav_text,"产品展示,性能参数,使用方法,应用工况,联系我们"
-meta,footer_text,"© 2026 迈德瑞（淮安）智能装备科技有限公司. All Rights Reserved. 统一社会信用代码: 91320891MAKML1457M"
-product,section_title,核心特种流体装备与专利技术产品
-product,section_description,攻克超高温、全静密封、耐磨陶瓷轴承等“卡脖子”技术，专注于为光热储能、先进核能、高端化工及特种冶金提供本质安全关键装备
+meta,nav_text,"产品展示,创新设计,高温磁力泵性能参数,高温轴承选型表,联系方式"
+meta,footer_text,© 2026 迈德瑞（淮安）智能装备科技有限公司. All Rights Reserved. 统一社会信用代码: 91320891MAKML1457M
+meta,hero_image,images/hero_image.jpg
+meta,admin_tab_performance,创新设计
+meta,admin_tab_usage,高温磁力泵性能参数
+meta,admin_tab_application,高温轴承选型表
+meta,admin_tab_contact,联系方式
+product,section_title,产品展示
+product,section_description,攻克高温全静密封磁力驱动、高温金属-陶瓷复合轴承等“卡脖子”技术，专注于为光热储能、先进核能、高端化工及特种冶金提供本质安全关键装备
 product,text_position,above
-product,image_count,4
-product,image1_caption,超高温熔盐磁力泵 (最高耐温 850℃)
-product,image1_description,全静密封零泄漏设计，从源头杜绝高温退磁与火灾风险，轴长仅1.5米替代传统20米长轴泵，合金用量减少80%，单台造价降本50%+
-product,image2_caption,金属-陶瓷复合轴承 (发明专利号: CN121382800A)
-product,image2_description,独家发明专利王牌产品，通过结构性复合攻克金属与陶瓷膨胀系数差异，500℃高温硬度达2400~2700 HV，耐磨寿命提升10倍以上
-product,image3_caption,先进核能高温铅铋泵 / 锂铅合金泵
-product,image3_description,专用于加速器次临界堆 (CiADS) 与第四代铅冷快堆回路，耐受480℃~550℃强辐射与高腐蚀，已批量交付中国原子能研究院
-product,image4_caption,特种工况超高温阀门与流体测控集成
-product,image4_description,超高温盲板阀、高温高压烟道挡板及传感器智能化测控系统，提供高温特种流体输送成套工程解决方案
-performance,section_title,核心技术指标与国内外主流竞品综合对标
-performance,section_description,三大关键技术突破：内外转子无磁钢驱动、金属-陶瓷复合轴承、全静密封+CFD自循环风冷，在耐温、安全与经济性上全面超越国内外竞品
+product,image_count,2
+product,blocks,"[{""t"":""image"",""id"":""m1"",""slot"":1,""src"":"""",""caption"":""超高温熔盐磁力泵 (最高耐温 800℃)"",""desc"":""内转子无磁钢全静密封零泄漏设计，从源头杜绝高温退磁与火灾风险，轴长大幅缩短代替长轴泵，合金用量减少80%，单台造价降本50%+"",""badge"":""🔥 耐温 800℃"",""w"":"""",""h"":"""",""fit"":""cover""},{""t"":""image"",""id"":""m2"",""slot"":2,""src"":"""",""caption"":""金属-陶瓷复合轴承 (发明专利)"",""desc"":""独家发明专利王牌产品，通过结构性复合攻克金属与陶瓷膨胀系数差异，800℃高温硬度达2400~2700 HV，耐磨寿命提升10倍以上"",""badge"":""📜 发明专利 "",""w"":"""",""h"":"""",""fit"":""cover""}]"
+performance,section_title,创新设计
+performance,section_description,四大关键技术突破：内转子无磁钢驱动解决高温磁钢退磁、自循环风冷无需冷却水，金属-陶瓷复合轴承解决高温轴承耐磨问题、气体隔离内转子与隔离套无冲刷磨损，安全与经济性上全面超越国内外竞品
 performance,text_position,above
-performance,image_count,3
-performance,image1_caption,内外转子无磁钢驱动磁仿真与耐温特性
-performance,image1_description,外转子交替磁路与铁磁内转子相位差扭矩传递，突破行业350℃退磁瓶颈，实现850℃超高温稳定连续运转
-performance,image2_caption,CFD 热流耦合与外转子风扇轮毂自散热
-performance,image2_description,电机带动外转子顶端风扇轮毂高速自旋转，小气隙大流速强制风冷，摆脱复杂外部冷却水系统与水处理成本
-performance,image3_caption,传统长轴泵轴系共振与轴承磨损痛点对比
-performance,image3_description,传统熔盐泵长达20米、9个导轴承极易热变形振动超标与烧瓦；迈德瑞仅1.5米紧凑轴长与2个复合轴承，振动极小
-usage,section_title,标准安装指引、免水冷运行与全生命周期运维
-usage,section_description,颠覆性紧凑结构大幅简化现场吊装与管路对接，全静密封与自循环风冷实现免日常维护，显著降低全生命周期综合成本
+performance,image_count,4
+performance,blocks,"[{""t"":""image"",""id"":""m1"",""slot"":1,""src"":"""",""caption"":""内转子无磁钢驱动器"",""desc"":""外转子交替磁路与铁磁内转子相位差传递扭矩，突破行业350℃退磁瓶颈，实现800℃超高温稳定连续运转"",""badge"":""无磁钢内转子"",""w"":"""",""h"":"""",""fit"":""cover""},{""t"":""image"",""id"":""m2"",""slot"":2,""src"":"""",""caption"":""外转子风扇轮毂自散热"",""desc"":""电机带动外转子自带风扇轮毂高速自旋转，小气隙大流速强制风冷，摆脱复杂外部冷却水系统"",""badge"":""自循环风冷"",""w"":"""",""h"":"""",""fit"":""cover""},{""t"":""image"",""id"":""m3"",""slot"":3,""src"":"""",""caption"":""金属-陶瓷复合轴承"",""desc"":""通过结构性复合解决金属与陶瓷高温线胀系数不同的问题，可以确保在不同温度下轴承间隙始终保持不变"",""badge"":""金属-陶瓷复合轴承"",""w"":"""",""h"":"""",""fit"":""cover""},{""t"":""image"",""id"":""m4"",""slot"":4,""src"":"""",""caption"":""隔离套内部无介质冲刷"",""desc"":""通过气体隔离方法，介质无法进入隔离套内部，内转子与隔离套无磨损，安全可靠。"",""badge"":""隔离套无冲刷"",""w"":""360"",""h"":"""",""fit"":""contain""}]"
+usage,section_title,高温磁力泵性能参数
+usage,section_description,
 usage,text_position,above
-usage,image_count,3
-usage,image1_caption,紧凑型模块化安装与空间节省指引
-usage,image1_description,整机轴长仅1.5米，无需传统20米长轴泵的高耸钢构支架与大型吊装作业，大幅减少占地面积与土建安装工程量
-usage,image2_caption,自循环风冷无水运行与环境适应规范
-usage,image2_description,启动即自散热，无需外接冷却水泵、冷却塔与水处理管路，避免北方严寒结冰与缺水地区冷却受限，可靠性极高
-usage,image3_caption,静密封隔离套与复合轴承长效巡检规范
-usage,image3_description,隔离套静态密封承压可靠，金属-陶瓷复合轴承硬度高达HV 2700且间隙恒定，理论实现无限运行寿命与极低故障率
-application,section_title,四大战略应用场景与国家重大项目供货实绩
-application,section_description,深度契合国家“双碳”战略与新质生产力，核心装备已在光热储能、先进核能、高端化工及特种冶金等重大工程中批量稳定运行
+usage,image_count,8
+usage,blocks,"[{""t"":""table"",""id"":""b1"",""title"":""高温磁力泵性能参数"",""subtitle"":"""",""head"":[""高温磁力泵"",""性能参数""],""rows"":[[""流量"",""500m³/h""],[""扬程"",""200m""],[""温度"",""800℃""],[""安装方式"",""立式""],[""介质"",""熔盐、液态金属、腐蚀性化工原料""],[""防护等级"",""IP65、IP68""],[""防爆等级"",""DIIBT4、DIICT4""]],""hl"":0,""from"":""""},{""t"":""image"",""id"":""b2"",""slot"":0,""src"":""images/usage-bkb2.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b3"",""slot"":0,""src"":""images/usage-bkb3.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b4"",""slot"":0,""src"":""images/usage-bkb4.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b5"",""slot"":0,""src"":""images/usage-bkb5.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b6"",""slot"":0,""src"":""images/usage-bkb6.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b7"",""slot"":0,""src"":""images/usage-bkb7.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b8"",""slot"":0,""src"":""images/usage-bkb8.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""},{""t"":""image"",""id"":""b9"",""slot"":0,""src"":""images/usage-bkb9.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":""150"",""h"":""150"",""fit"":""contain""}]"
+application,section_title,高温轴承选型表
+application,section_description,
 application,text_position,above
-application,image_count,4
-application,image1_caption,光热储能 (CSP) —— 565℃ 熔盐吸热与储能主循环
-application,image1_description,适配塔式/槽式光热电站565℃高温二元熔盐主循环回路，解决传统泵低效易漏短板，保障储能电站连续安全运转
-application,image2_caption,先进核能 (Nuclear) —— CiADS 次临界铅铋堆与聚变回路
-application,image2_description,中国原子能院已供货12台高温铅铋泵、中科院合肥院供货2台，适配480℃~550℃核反应堆一/二回路冷却剂循环
-application,image3_caption,高端化工 (Chemical) —— 350~400℃ 强腐蚀工艺输送
-application,image3_description,适用于有机合成与精细化工高温熔盐换热及强酸强碱介质输送，全静密封杜绝危化品挥发与介质污染
-application,image4_caption,特种冶金 (Metallurgy) —— 高温熔体与熔渣特种转移
-application,image4_description,耐受高温熔液磨损与严苛腐蚀，在山东豪迈集团已供货7台并批量稳定运行，大幅提高产线连续作业率
-contact,section_title,联系我们 & 工况参数在线选型定制
-contact,section_description,迈德瑞技术专家团队为您提供 850℃ 超高温磁力泵与金属-陶瓷复合轴承选型支持、图纸对接与极速技术方案定制
+application,image_count,2
+application,blocks,"[{""t"":""image"",""id"":""m1"",""slot"":1,""src"":""images/app-bkm1.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":"""",""h"":""500"",""fit"":""contain""},{""t"":""image"",""id"":""b1"",""slot"":0,""src"":""images/app-bkb1.jpg"",""caption"":"""",""desc"":"""",""badge"":"""",""w"":"""",""h"":""500"",""fit"":""contain""}]"
+contact,section_title,联系我们
+contact,section_description,迈德瑞技术专家团队为您提供 800℃ 超高温磁力泵与金属-陶瓷复合轴承选型支持、图纸对接与极速技术方案定制
 contact,company_name,迈德瑞（淮安）智能装备科技有限公司
-contact,phone,400-888-9999 / 0517-88886666
-contact,email,sales@magdrive-tech.com
+contact,phone,13591837024
+contact,email,techserver@foxmail.com
 contact,address,江苏省淮安经济技术开发区南马厂街道内湖路82号经管站103室
 contact,hours,周一至周五 08:30 - 18:00
 contact,form_title,在线技术咨询与工况参数选型定制
 contact,form_subtitle,请提交您的介质类型 (熔盐/液态金属/强酸碱)、运行温区、流量扬程或技术要求，工程师团队2小时内对接
-contact,credit_code,91320891MAKML1457M
+contact,credit_code,
 contact,legal_person,张剑
 contact,registered_capital,450万元整
+texts,hero_pre_title,
+texts,hero_title,"面向熔盐与液态金属输送的
+      **高温磁力泵**"
+texts,hero_desc,攻克 800℃ 超高温磁力驱动、800℃金属-陶瓷复合轴承，为光热储能、先进核能及高端化工提供本质安全动力保障。
+texts,hero_badge_1,
+texts,hero_badge_2,
+texts,hero_badge_3,
+texts,hero_badge_4,
+texts,hero_btn_1,
+texts,hero_btn_2,
+texts,hero_btn_3,
+texts,hero_tag_top,轴长大幅缩短，代替长轴泵
+texts,hero_tag_bottom,金属-陶瓷复合轴承 · 寿命提升 10 倍
+texts,hero_card_hint,点击查看高清装备模型大图
+texts,stat_1_val,800
+texts,stat_1_unit,℃
+texts,stat_1_label,突破行业耐温极限
+texts,stat_1_sub,传统磁力泵极限≤350℃
+texts,stat_2_val,0
+texts,stat_2_unit,泄漏
+texts,stat_2_label,全静密封本质安全
+texts,stat_2_sub,从源头杜绝高温介质外漏
+texts,stat_3_val,10
+texts,stat_3_unit,倍+
+texts,stat_3_label,复合轴承耐磨寿命
+texts,stat_3_sub,发明专利 CN121382800A
+texts,stat_4_val,80
+texts,stat_4_unit,%↓
+texts,stat_4_label,高温合金用量节约
+texts,stat_4_sub,整机造价降低 50% 以上
+texts,stat_5_val,23
+texts,stat_5_unit,台+
+texts,stat_5_label,国家级院所供货实绩
+texts,stat_5_sub,中国原子能院/中科院/中广核
+texts,section_tag_product,专利技术
+texts,section_tag_performance,关键技术
+texts,section_tag_usage,性能参数
+texts,section_tag_application,高温轴承尺寸
+texts,contact_tag,
+texts,zoom_hint,🔍 点击全屏预览
+texts,card_click_hint,点击查看高清大图及结构细节
+texts,title_suffix, - MagDrive 高温磁力泵与关键装备
+texts,admin_link,管理后台
+texts,mobile_nav_title,网站导航
+texts,mobile_admin_link,进入管理后台
+texts,contact_phone_label,技术咨询 / 销售热线
+texts,contact_email_label,技术选型与商务邮箱
+texts,contact_email_extra,
+texts,contact_address_label,产业化核心基地
+texts,contact_hours_label,技术支持响应时间
+texts,contact_hours_note,(紧急工况2小时极速响应)
+texts,contact_credit_label,统一社会信用代码
+texts,license_title,国家市场监督管理总局监制 · 正规营业执照
+texts,license_sub_template,法定代表人: {legal_person} · 注册资本: {registered_capital} (点击查看原件)
+texts,license_caption_template,{company} - 营业执照官方资质认证
+texts,license_desc_template,统一社会信用代码: {credit_code} | 法定代表人: {legal_person} | 注册资本: {registered_capital} | 发证机关: 淮安经济技术开发区行政审批局
+texts,form_label_name,您的姓名 / 称呼
+texts,form_ph_name,例如：张总 / 李总工
+texts,form_label_contact,联系电话 / 微信
+texts,form_ph_contact,例如：13800000000
+texts,form_label_email,电子邮箱
+texts,form_ph_email,例如：engineer@company.com
+texts,form_label_company,单位 / 企业名称
+texts,form_ph_company,例如：某某能源装备 / 化工研究院
+texts,form_label_product,输送介质类型
+texts,form_label_temp,运行温度区间
+texts,form_label_message,工况参数与技术要求 (流量 m³/h、扬程 m、耐压、介质密度等)
+texts,form_ph_message,请简要描述您的工程需求，例如：需要565℃二元熔盐主循环泵，流量150m³/h，扬程60m，要求全静密封零泄漏...
+texts,form_product_options,"高温二元熔盐 (565℃ 光热/储能)
+液态铅铋合金 (LBE 480~550℃ 先进核能)
+液态锂铅合金 (聚变堆包层回路)
+高温强酸强碱 / 腐蚀性介质 (化工)
+高温熔融金属 / 熔渣 (冶金)
+耐高温金属-陶瓷复合轴承配套 (专利)
+其他极端工况定制"
+texts,form_temp_options,"350℃ ~ 500℃ (中高温工况)
+*500℃ ~ 650℃ (典型熔盐/铅铋工况)
+650℃ ~ 850℃ (极限超高温工况)
+350℃ 以下 (常规特种流体)"
+texts,form_submit_text,🚀 提交工况选型需求，获取技术方案与报价
+texts,form_submitting_text,⏳ 正在提交需求...
+texts,form_success_msg,🎉 需求已成功提交！我们的技术专家将在2小时内与您联系对接技术方案。
+texts,form_error_msg,提交失败，请重试或直接致电 {phone}: 

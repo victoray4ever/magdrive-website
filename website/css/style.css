@@ -338,6 +338,25 @@ main {
   line-height: 1.7;
 }
 
+/* ===== 板块内容块容器（图片块与表格块混排） ===== */
+.content-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: flex-start;
+}
+.content-blocks > .image-card {
+  flex: 1 1 320px;
+}
+/* 表格块默认整行铺满，保证多列时可读 */
+.content-blocks > .block-table-container {
+  flex: 1 1 100%;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .content-blocks > .image-card { flex: 1 1 100%; }
+}
+
 /* ===== Image Grid & Card ===== */
 .image-grid {
   display: grid;
@@ -368,11 +387,41 @@ main {
   height: 220px;
 }
 .image-card img {
+  display: block; /* 去掉 inline 基线间隙，保证自定义高度下图片高度精确 */
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
   border-bottom: 1px solid var(--border);
+}
+/* 自定义了宽高的卡片：整体随尺寸收缩，小尺寸下依然完整、不被内容撑开 */
+.image-card.is-sized {
+  min-width: 0;
+}
+.image-card.is-sized .image-card-thumb-wrap {
+  min-height: 0;
+}
+.image-card.is-sized .card-body {
+  padding: 14px 16px;
+}
+.image-card.is-sized .card-caption {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.image-card.is-sized .card-description {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.image-card.is-sized .card-badge {
+  font-size: 11px;
+  padding: 3px 9px;
+}
+.image-card.is-sized .zoom-hint {
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  top: 8px;
+  right: 8px;
 }
 .image-card:hover img {
   transform: scale(1.05);
@@ -1336,9 +1385,15 @@ main {
   -webkit-text-fill-color: transparent;
 }
 .hero-sub-title {
-  font-size: 16px;
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+.hero-desc {
+  font-size: 15px;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.72);
 }
 .hero-badges {
   display: flex;
@@ -1712,123 +1767,220 @@ main {
   .hero-floating-tag.tag-bottom { bottom: 8px; left: 8px; }
 }
 
-/* ===== 客户实绩与产学研体系展示 ===== */
-.client-team-showcase {
-  margin-top: 48px;
-}
-.showcase-block {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-}
-.showcase-title {
-  text-align: center;
-  margin-bottom: 24px;
-}
-.showcase-title h3 {
-  font-size: 20px;
-  color: #0f172a;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-.showcase-title p {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-.client-grid-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-}
-.client-stat-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.25s ease;
-}
-.client-stat-card:hover {
-  transform: translateY(-3px);
-  border-color: #38bdf8;
-  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.12);
-}
-.client-logo-wrap {
-  height: 48px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-}
-.client-logo-wrap img {
-  max-height: 44px;
-  max-width: 140px;
-  object-fit: contain;
-}
-.client-stat-info h4 {
-  font-size: 15px;
-  color: #1e293b;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-.client-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 10px;
+/* ===== 后台 · 全站文案编辑分组样式 ===== */
+.text-group-title {
+  margin: 26px 0 12px;
+  padding: 9px 14px;
+  background: #eef4fb;
+  border-left: 4px solid #1976d2;
   border-radius: 4px;
-  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0d47a1;
 }
-.client-stat-info p {
-  font-size: 12px;
-  color: #64748b;
-  line-height: 1.5;
-  margin: 0;
+.admin-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+}
+.admin-subgrid .form-group {
+  margin-bottom: 0;
+}
+@media (max-width: 720px) {
+  .admin-subgrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* 产学研三柱 */
-.pillars-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+/* ===== 后台：板块内容块（图片 / 表格）编辑器 ===== */
+.blocks-holder {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 12px;
 }
-.pillar-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+.block-item {
+  border: 2px solid var(--border);
   border-radius: 10px;
-  padding: 24px;
-  text-align: center;
-  transition: all 0.25s ease;
+  background: #fbfdff;
+  overflow: hidden;
 }
-.pillar-card:hover {
-  transform: translateY(-3px);
-  border-color: #38bdf8;
-  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.12);
+.blk-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #eef4fb;
+  border-bottom: 1px solid var(--border);
 }
-.pillar-icon {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-.pillar-card h4 {
-  font-size: 16px;
-  color: #0f172a;
-  margin-bottom: 4px;
+.blk-type {
+  font-size: 13px;
   font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  color: #fff;
 }
-.pillar-card h5 {
+.blk-type.is-image { background: #1976d2; }
+.blk-type.is-table { background: #7b1fa2; }
+.blk-order { font-size: 12px; color: #64748b; }
+.blk-actions { margin-left: auto; display: flex; gap: 6px; }
+.blk-move, .blk-del {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
   font-size: 13px;
-  color: #0284c7;
-  margin-bottom: 8px;
-  font-weight: 600;
+  color: #334155;
 }
-.pillar-card p {
+.blk-move:disabled { opacity: 0.4; cursor: not-allowed; }
+.blk-del { color: #c62828; }
+.blk-body {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+  align-items: flex-start;
+}
+.blk-body-table { flex-direction: column; }
+.blk-img-col {
+  width: 180px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.blk-preview {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f0f4f8;
+}
+.blk-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.blk-size-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   font-size: 13px;
-  color: #64748b;
-  line-height: 1.6;
+  color: #475569;
+}
+.blk-size-row input {
+  width: 140px;
+  padding: 7px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.blk-size-row select {
+  padding: 7px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+}
+.blk-size-tip {
   margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+.tbl-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #475569;
+}
+.tbl-toolbar button {
+  border: 1px dashed var(--border);
+  background: #fff;
+  color: #0d47a1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.tbl-toolbar select {
+  padding: 6px 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.tbl-editor {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.tbl-editor th, .tbl-editor td {
+  padding: 4px;
+  vertical-align: middle;
+}
+.tbl-editor input {
+  width: 100%;
+  min-width: 90px;
+  padding: 6px 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.tbl-cell { display: flex; align-items: center; gap: 4px; }
+.tbl-x {
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+.tbl-row-ops { width: 32px; }
+.blocks-add { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.blocks-add button {
+  border: 2px dashed var(--border);
+  background: #fff;
+  color: #0d47a1;
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.blocks-add button:hover { background: #eff6ff; border-color: #0d47a1; }
+/* 新建表格的初始 列 / 行 数 */
+.blocks-add-dim {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #475569;
+}
+.blocks-add-dim input {
+  width: 62px;
+  padding: 7px 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.blocks-add-tip { font-size: 12px; color: #94a3b8; }
+/* 表格块 0 列时的引导（不预置任何模板内容） */
+.tbl-empty {
+  padding: 14px 16px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  background: #f8fafc;
+}
+@media (max-width: 720px) {
+  .blk-body { flex-direction: column; }
+  .blk-img-col { width: 100%; }
 }

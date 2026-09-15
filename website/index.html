@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>迈德瑞（淮安）智能装备科技有限公司 - MagDrive 精密轴承与智能装备</title>
   <link rel="icon" type="image/png" href="images/logo.png">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260914n">
 </head>
 <body>
   <!-- 网站顶部导航 -->
@@ -23,7 +23,7 @@
         <a href="#contact">联系我们</a>
       </nav>
       <div class="header-actions">
-        <a href="admin.html" class="admin-link">管理后台</a>
+        <a href="admin.html" class="admin-link" id="adminLink">管理后台</a>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="切换菜单">
           <span></span>
           <span></span>
@@ -37,14 +37,14 @@
   <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
   <aside class="mobile-nav-drawer" id="mobileNavDrawer">
     <div class="mobile-nav-header">
-      <span class="mobile-nav-title">网站导航</span>
+      <span class="mobile-nav-title" id="mobileNavTitle">网站导航</span>
       <button class="mobile-nav-close" id="mobileNavClose" aria-label="关闭菜单">&times;</button>
     </div>
     <nav class="mobile-nav-links" id="mobileNavLinks">
       <!-- 由 main.js 动态渲染 -->
     </nav>
     <div class="mobile-nav-footer">
-      <a href="admin.html" class="mobile-admin-link">进入管理后台</a>
+      <a href="admin.html" class="mobile-admin-link" id="mobileAdminLink">进入管理后台</a>
     </div>
   </aside>
 
@@ -56,12 +56,15 @@
         <div class="hero-left">
           <div class="hero-pre-title">
             <span class="pulse-dot"></span>
-            <span>2026 淮安市高端人才精英赛答辩项目 · 能源核心装备国产替代</span>
+            <span id="heroPreTitle">2026 淮安市高端人才精英赛答辩项目 · 能源核心装备国产替代</span>
           </div>
           <h1 id="heroTitle" class="hero-main-title">面向熔盐与液态金属输送的<br><span class="gradient-text">高温磁力泵关键装备</span>研发及产业化</h1>
-          <p id="heroSubtitle" class="hero-sub-title">攻克 850℃ 超高温无磁钢驱动、金属-陶瓷复合轴承（国家发明专利 CN121382800A）与全静密封零泄漏核心技术，为光热储能、先进核能及高端化工提供本质安全动力保障。</p>
-          
-          <div class="hero-badges">
+          <!-- 网站副标题：由后台「网站标题 - 网站副标题」字段驱动 -->
+          <p id="heroSubtitle" class="hero-sub-title">MagDrive · 面向熔盐与液态金属输送的高温磁力泵关键装备研发与产业化</p>
+          <!-- Hero 详细技术说明：由后台「首页与通用文案」驱动 -->
+          <p class="hero-desc" id="heroDesc">攻克 850℃ 超高温无磁钢驱动、金属-陶瓷复合轴承（国家发明专利 CN121382800A）与全静密封零泄漏核心技术，为光热储能、先进核能及高端化工提供本质安全动力保障。</p>
+
+          <div class="hero-badges" id="heroBadges">
             <span class="hero-badge">🔥 突破 850℃ 耐温极限</span>
             <span class="hero-badge">🛡️ 全静密封 零泄漏</span>
             <span class="hero-badge">📜 发明专利复合轴承</span>
@@ -69,9 +72,9 @@
           </div>
 
           <div class="hero-actions">
-            <a href="#tech" class="btn btn-primary">🌟 探索核心技术</a>
-            <a href="#compare" class="btn btn-secondary">📊 参数对标国际巨头</a>
-            <a href="#contact" class="btn btn-outline">📋 工况在线选型</a>
+            <a href="#product" class="btn btn-primary" id="heroBtn1">🌟 探索核心技术</a>
+            <a href="#compare" class="btn btn-secondary" id="heroBtn2">📊 参数对标国际巨头</a>
+            <a href="#contact" class="btn btn-outline" id="heroBtn3">📋 工况在线选型</a>
           </div>
         </div>
 
@@ -79,21 +82,21 @@
         <div class="hero-right">
           <div class="hero-card-showcase" id="heroCardShowcase" title="点击查看高清装备模型大图">
             <div class="hero-card-glow"></div>
-            <img src="images/hero_pump_3d.png" alt="高温磁力泵关键装备" class="hero-pump-img">
+            <img src="images/hero_pump_3d.png" alt="高温磁力泵关键装备" class="hero-pump-img" id="heroPumpImg">
             <div class="hero-floating-tag tag-top">
               <span class="tag-icon">⚡</span>
-              <span>轴长仅 1.5m · 告别 20m 传统长轴</span>
+              <span id="heroTagTop">轴长仅 1.5m · 告别 20m 传统长轴</span>
             </div>
             <div class="hero-floating-tag tag-bottom">
               <span class="tag-icon">🏆</span>
-              <span>金属-陶瓷复合轴承 · 寿命提升 10 倍</span>
+              <span id="heroTagBottom">金属-陶瓷复合轴承 · 寿命提升 10 倍</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 五大核心关键指标数据看板 -->
-      <div class="hero-stats-strip">
+      <div class="hero-stats-strip" id="heroStatsStrip">
         <div class="stat-item">
           <div class="stat-val">850<span class="stat-unit">℃</span></div>
           <div class="stat-label">突破行业耐温极限</div>
@@ -162,8 +165,8 @@
     </svg>
   </button>
 
-  <script src="js/data.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/data.js?v=20260914n"></script>
+  <script src="js/main.js?v=20260914n"></script>
 </body>
 </html>
 

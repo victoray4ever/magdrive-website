@@ -26,17 +26,15 @@ function showAdminPanel() {
   renderAdminPanel();
 }
 
-async function handleLogin(e) {
+function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   const errorEl = document.getElementById('loginError');
-  errorEl.textContent = '';
-  const result = await DataManager.login(username, password);
-  if (result.success) {
+  if (DataManager.login(username, password)) {
     showAdminPanel();
   } else {
-    errorEl.textContent = result.message || '用户名或密码错误，请重试';
+    errorEl.textContent = '用户名或密码错误，请重试';
   }
 }
 
@@ -62,11 +60,10 @@ function renderAdminPanel() {
 
   panel.innerHTML = `
     <div class="admin-topbar" ${headerBg ? 'style="background:' + headerBg + ';"' : ''}>
-      <h1>${logoHtml}管理后台 - 迈德瑞智能装备科技</h1>
+      <h1>${logoHtml}管理后台 - 轴承产品展示</h1>
       <div class="actions">
         ${serverBadge}
         <a href="index.html" class="btn-view-site" target="_blank">查看前台</a>
-        <button onclick="openPasswordModal()" class="btn-change-pwd" title="修改后台管理员登录密码" style="padding:7px 14px;background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">🔑 修改密码</button>
         <button onclick="handleResetDefaults()" class="btn-reset-defaults" title="重置回初始设置">恢复默认</button>
         <button onclick="handleLogout()" class="btn-logout">退出登录</button>
       </div>
@@ -84,7 +81,7 @@ function renderAdminPanel() {
           <input type="text" id="meta_site_subtitle" value="${escapeAttr(DataManager.getValue('meta','site_subtitle'))}">
         </div>
         <div class="form-group">
-          <label>导航栏文字（用逗号分隔，如：产品展示,性能参数,使用方法,应用工况,联系我们）</label>
+          <label>导航栏文字（逗号分隔整串快速修改；推荐在「首页与通用文案 → 🌐 前台导航栏名称」逐项编辑，保存时以逐项编辑为准）</label>
           <input type="text" id="meta_nav_text" value="${escapeAttr(DataManager.getValue('meta','nav_text'))}">
         </div>
         <div class="form-group">
@@ -114,43 +111,16 @@ function renderAdminPanel() {
             </div>
           </div>
         </div>
-        <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px;">
-          <div class="form-group" style="flex:1;min-width:200px;">
-            <label>Logo 图片（替换齿轮图标）</label>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img id="logo_preview" src="${DataManager.getMetaImage('logo') || ''}" style="width:60px;height:40px;object-fit:contain;border:2px solid var(--border);border-radius:6px;background:var(--bg-section);${DataManager.getMetaImage('logo') ? '' : 'display:none;'}">
-              <label class="upload-btn" style="display:inline-block;padding:8px 16px;background:var(--primary-light);color:var(--primary-dark);border:1px solid var(--primary);border-radius:6px;font-size:13px;cursor:pointer;">
-                上传 Logo
-                <input type="file" accept="image/*" style="display:none;" onchange="handleMetaImageUpload(event, 'logo', 'logo_preview')">
-              </label>
-              ${DataManager.getMetaImage('logo') ? '<button class="remove-btn" style="display:inline-block;padding:6px 12px;background:#fff0f0;color:#d32f2f;border:1px solid #ef9a9a;border-radius:6px;font-size:13px;cursor:pointer;" onclick="removeMetaImageUpload(\'logo\', \'logo_preview\')">删除</button>' : ''}
-            </div>
-          </div>
-          <div class="form-group" style="flex:1;min-width:200px;">
-            <label>Hero 背景图片（替换渐变色）</label>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img id="hero_bg_preview" src="${DataManager.getMetaImage('hero_bg') || ''}" style="width:60px;height:40px;object-fit:cover;border:2px solid var(--border);border-radius:6px;background:var(--bg-section);${DataManager.getMetaImage('hero_bg') ? '' : 'display:none;'}">
-              <label class="upload-btn" style="display:inline-block;padding:8px 16px;background:var(--primary-light);color:var(--primary-dark);border:1px solid var(--primary);border-radius:6px;font-size:13px;cursor:pointer;">
-                上传背景图
-                <input type="file" accept="image/*" style="display:none;" onchange="handleMetaImageUpload(event, 'hero_bg', 'hero_bg_preview')">
-              </label>
-              ${DataManager.getMetaImage('hero_bg') ? '<button class="remove-btn" style="display:inline-block;padding:6px 12px;background:#fff0f0;color:#d32f2f;border:1px solid #ef9a9a;border-radius:6px;font-size:13px;cursor:pointer;" onclick="removeMetaImageUpload(\'hero_bg\', \'hero_bg_preview\')">删除</button>' : ''}
-            </div>
-          </div>
-        </div>
+        <!-- Logo 图片（通用图片控件） -->
+        ${renderMetaImageControl('logo', 'Logo 图片（替换齿轮图标）', '建议使用正方形透明底 PNG，前台按最大高度 36px 显示。', { width: 72, height: 48, fit: 'contain', deleteLabel: '删除 Logo' })}
       </div>
 
-      <!-- Tab 导航 -->
-      <div class="admin-tabs" id="adminTabs">
-        ${DataManager.sections.map((s, i) =>
-          `<button class="admin-tab ${i === 0 ? 'active' : ''}" onclick="switchTab('${s}')">${DataManager.sectionLabels[s]}</button>`
-        ).join('')}
-        <button class="admin-tab" onclick="switchTab('contact')">联系信息设置</button>
-        <button class="admin-tab" onclick="switchTab('inquiries')">客户询盘管理 📩</button>
-      </div>
+      <!-- Tab 导航（标签文字可在「首页与通用文案」Tab 内自定义） -->
+      <div class="admin-tabs" id="adminTabs">${renderAdminTabsInner(DataManager.sections[0] || 'texts')}</div>
 
       <!-- Tab 内容 -->
       <div id="tabContents">
+        <div class="tab-content" id="tab_texts">${renderTextsTab()}</div>
         ${DataManager.sections.map((s, i) =>
           `<div class="tab-content ${i === 0 ? 'active' : ''}" id="tab_${s}">${renderSectionEditor(s)}</div>`
         ).join('')}
@@ -171,12 +141,216 @@ function renderAdminPanel() {
   loadInquiriesList();
 }
 
+// ===== 后台标签栏名称编辑组 =====
+function renderAdminTabLabelsGroup() {
+  const desc = {
+    texts: '全站文案页（第一个标签）',
+    contact: '联系方式页',
+    inquiries: '询盘列表页'
+  };
+  const inputs = DataManager.ADMIN_TAB_ORDER.map(id => {
+    const label = desc[id] || ('「' + (DataManager.sectionLabels[id] || id) + '」板块页');
+    return `
+      <div class="form-group">
+        <label>${escapeHtml(label)}</label>
+        <input type="text" id="admintab_${id}" value="${escapeAttr(DataManager.getAdminTabLabel(id))}" placeholder="${escapeAttr(DataManager.ADMIN_TAB_DEFAULTS[id] || '')}">
+      </div>`;
+  }).join('');
+  return `
+    <div class="text-group-title">🧭 后台标签栏名称</div>
+    <p style="margin:-6px 0 12px;color:#64748b;font-size:13px;">自定义管理后台顶部这一排标签的文字（仅影响后台界面，<b>不影响网站前台</b>；前台顶部导航栏的文字请在下方「🌐 前台导航栏名称」中修改）。清空某一项即恢复该标签的默认名称。</p>
+    <div class="admin-subgrid">${inputs}</div>
+  `;
+}
+
+// ===== 前台导航栏名称编辑组（网站前台顶部导航，桌面端一行 + 手机端抽屉菜单同步生效） =====
+function getNavDefaultLabels() {
+  return ["产品展示", "性能参数", "使用方法", "应用工况", "联系我们"];
+}
+
+// 解析当前前台导航项（与 main.js renderNavigation 完全一致的取值与回退逻辑）
+function getNavLabels() {
+  const navText = DataManager.getValue("meta", "nav_text") || getNavDefaultLabels().join(",");
+  const labels = navText.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+  return labels.length ? labels : [""];
+}
+
+function renderNavItemsInner(labels) {
+  const items = labels || getNavLabels();
+  const defaults = getNavDefaultLabels();
+  const rows = items.map((label, i) => `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+      <input type="text" class="nav-item-input" value="${escapeAttr(label)}" placeholder="${escapeAttr(defaults[i] || '导航项文字')}" title="第 ${i + 1} 项：前台导航栏第 ${i + 1} 个菜单的文字" oninput="var h=this.closest('#navItemsHolder');if(h)h.dataset.dirty='1';">
+      <button type="button" onclick="removeNavItem(${i})" title="删除这一项" style="width:36px;height:40px;flex:none;border:2px solid var(--border);border-radius:6px;background:#fff;color:#ef4444;cursor:pointer;font-size:15px;">✕</button>
+    </div>`).join('');
+  return rows + `<button type="button" onclick="addNavItem()" style="padding:8px 16px;border:2px dashed var(--border);border-radius:6px;background:#fff;color:#0d47a1;cursor:pointer;font-size:13px;">＋ 添加导航项</button>`;
+}
+
+// 按当前 DOM 顺序收集所有导航项输入框的值（保留空串占位，便于增删）
+function collectNavItemValues() {
+  return Array.prototype.map.call(document.querySelectorAll('#navItemsHolder .nav-item-input'), el => el.value.trim());
+}
+
+function rerenderNavItems(values) {
+  const holder = document.getElementById('navItemsHolder');
+  if (!holder) return;
+  holder.innerHTML = renderNavItemsInner(values && values.length ? values : [""]);
+}
+
+function markNavDirty() {
+  const holder = document.getElementById('navItemsHolder');
+  if (holder) holder.dataset.dirty = '1';
+}
+
+function addNavItem() {
+  const values = collectNavItemValues();
+  values.push("");
+  rerenderNavItems(values);
+  markNavDirty();
+}
+
+function removeNavItem(i) {
+  const values = collectNavItemValues();
+  values.splice(i, 1);
+  rerenderNavItems(values.length ? values : [""]);
+  markNavDirty();
+}
+
+function renderNavLabelsGroup() {
+  return `
+    <div class="text-group-title">🌐 前台导航栏名称</div>
+    <p style="margin:-6px 0 12px;color:#64748b;font-size:13px;">网站前台顶部的导航菜单文字（桌面端导航条 + 手机端抽屉菜单同步生效），每项按顺序对应跳转的页面板块，可增删项数。全部清空并保存则恢复默认五项导航。</p>
+    <div id="navItemsHolder" style="max-width:560px;">${renderNavItemsInner()}</div>
+  `;
+}
+
+// ===== 「首页与通用文案」Tab =====
+function renderTextsTab() {
+  const groups = ['hero', 'hero_stats', 'section_tags', 'cards', 'misc'];
+  return `
+    <h3 style="margin-bottom:6px;color:#0d47a1;">首页与通用文案设置</h3>
+    <p style="margin:0 0 18px;color:#64748b;font-size:13px;">页面上的全部文字均在此修改。留空的徽章 / 按钮会在前台自动隐藏；主标题支持换行与 **渐变高亮** 语法。</p>
+
+    ${renderAdminTabLabelsGroup()}
+
+    ${renderNavLabelsGroup()}
+
+    <div class="text-group-title">🖼️ 首页图片（背景大图 / 装备主图）</div>
+    ${renderMetaImageControl(
+      'hero_bg',
+      '首页背景大图（可选）',
+      '未上传时使用「Hero 背景色」渐变；上传后前台会自动叠加深色蒙版，保证白色文字可读。',
+      { width: 150, height: 84, deleteLabel: '删除背景图' }
+    )}
+    ${renderMetaImageControl(
+      'hero_image',
+      '首页装备主图（首屏右侧大图）',
+      '建议使用透明底或深色底装备图；点击前台该图可打开大图画廊。删除后恢复内置装备图。',
+      { width: 110, height: 84, fit: 'contain', deleteLabel: '恢复默认图' }
+    )}
+
+    ${groups.map(g => renderTextGroup(g)).join('')}
+  `;
+}
+
+// ===== 渲染一组文案字段（带分组标题） =====
+function renderTextGroup(group) {
+  const entries = DataManager.getTexts(group);
+  if (!entries.length) return '';
+  const groupLabel = DataManager.textGroupLabels[group] || group;
+  return `
+    <div class="text-group-title">${groupLabel}</div>
+    <div class="admin-subgrid">
+      ${entries.map(t => renderTextField(t)).join('')}
+    </div>
+  `;
+}
+
+// ===== 渲染单个文案字段 =====
+function renderTextField(t) {
+  const val = DataManager.getValue('texts', t.key) || '';
+  const id = 'texts_' + t.key;
+  if (t.type === 'textarea') {
+    return `
+      <div class="form-group" style="grid-column:1 / -1;">
+        <label>${t.label}</label>
+        <textarea id="${id}" rows="${t.key === 'hero_title' ? 3 : 4}">${escapeHtml(val)}</textarea>
+      </div>`;
+  }
+  return `
+      <div class="form-group">
+        <label>${t.label}</label>
+        <input type="text" id="${id}" value="${escapeAttr(val)}">
+      </div>`;
+}
+
+// ===== 通用 meta 图片管理控件（上传 / 替换 / 删除）=====
+// 全站所有「背景图 / 主图 / Logo」类图片共用同一套控件，避免各处重复实现。
+const META_IMG_CONFIG = {}; // holderId -> { key, label, hint, opts }
+
+function metaImgIds(key) {
+  const safe = String(key).replace(/[^a-zA-Z0-9_]/g, '_');
+  return { previewId: 'metaimg_pv_' + safe, holderId: 'metaimg_' + safe };
+}
+
+function metaImageControlInner(key, label, hint, opts) {
+  opts = opts || {};
+  const ids = metaImgIds(key);
+  META_IMG_CONFIG[ids.holderId] = { key: key, label: label, hint: hint, opts: opts };
+  const current = DataManager.getMetaImage(key);
+  const w = opts.width || 120;
+  const h = opts.height || 68;
+  const fit = opts.fit || 'cover';
+  const delLabel = opts.deleteLabel || '删除图片';
+  return `
+    <div class="form-group" style="padding:16px;background:var(--primary-light);border-radius:8px;">
+      <label style="color:var(--primary-dark);font-size:15px;">${label}</label>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;">
+        <img id="${ids.previewId}" src="${current || ''}" style="width:${w}px;height:${h}px;object-fit:${fit};border:2px solid var(--border);border-radius:6px;background:#fff;${current ? '' : 'display:none;'}">
+        <label class="upload-btn" style="display:inline-block;padding:9px 18px;background:var(--primary);color:#fff;border-radius:6px;font-size:13px;cursor:pointer;">
+          ${current ? '🔄 替换图片' : '⬆️ 上传图片'}
+          <input type="file" accept="image/*" style="display:none;" onchange="handleMetaImageUpload(event, '${key}', '${ids.previewId}', '${ids.holderId}')">
+        </label>
+        ${current ? `<button class="remove-btn" style="display:inline-block;padding:8px 14px;background:#fff0f0;color:#d32f2f;border:1px solid #ef9a9a;border-radius:6px;font-size:13px;cursor:pointer;" onclick="removeMetaImageUpload('${key}', '${ids.previewId}', '${ids.holderId}')">🗑️ ${delLabel}</button>` : ''}
+        ${hint ? `<span style="font-size:12px;color:var(--text-secondary);flex-basis:100%;line-height:1.6;">${hint}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+// 返回带 holder 的完整控件（holder 用于上传/删除后局部刷新）
+function renderMetaImageControl(key, label, hint, opts) {
+  const ids = metaImgIds(key);
+  return `<div id="${ids.holderId}">${metaImageControlInner(key, label, hint, opts)}</div>`;
+}
+
+function refreshMetaImageControl(holderId) {
+  const cfg = META_IMG_CONFIG[holderId];
+  const holder = document.getElementById(holderId);
+  if (cfg && holder) holder.innerHTML = metaImageControlInner(cfg.key, cfg.label, cfg.hint, cfg.opts);
+}
+
+// ===== 板块背景图控件（复用通用图片控件）=====
+function renderSectionBgControl(section) {
+  return renderMetaImageControl(
+    'section_bg_' + section,
+    '🖼️ 板块背景图片（可选，删除后恢复纯色背景）',
+    '前台将自动叠加浅色蒙版保证文字可读',
+    { width: 120, height: 68, deleteLabel: '删除背景图' }
+  );
+}
+
+function refreshSectionBgControl(section) {
+  refreshMetaImageControl(metaImgIds('section_bg_' + section).holderId);
+}
+
+
+
 // ===== 渲染单个板块编辑器 =====
 function renderSectionEditor(section) {
-  const count = DataManager.getImageCount(section);
   const title = DataManager.getValue(section, 'section_title');
   const description = DataManager.getValue(section, 'section_description');
   const textPosition = DataManager.getValue(section, 'text_position') || 'above';
+  const blocks = DataManager.getBlocks(section);
 
   let html = `
     <div class="form-group">
@@ -194,57 +368,351 @@ function renderSectionEditor(section) {
         <option value="below" ${textPosition === 'below' ? 'selected' : ''}>文字在图片下方</option>
       </select>
     </div>
-    <div class="image-count-control">
-      <label>图片数量：</label>
-      <input type="number" id="${section}_image_count" value="${count}" min="1" max="20">
-      <button onclick="updateImageCount('${section}')">更新数量</button>
+    <!-- 板块背景图管理（上传 / 替换 / 删除） -->
+    ${renderSectionBgControl(section)}
+    <div class="text-group-title">🧩 板块内容块（图片 / 表格 可自由增删与排序）</div>
+    <p style="margin:-6px 0 12px;color:#64748b;font-size:13px;">图片块可自定义显示宽高（填 <b>200</b> / <b>200px</b> / <b>50%</b> 均可，只填宽度时高度按原图比例自动缩放，留空则自适应）；「填充方式」决定图片是裁切填满还是完整缩放（整体变小、不裁切）。表格块可增删行列、设置高亮列。调整后点击「保存所有更改」落盘。</p>
+    <div class="blocks-holder" id="${blocksHolderId(section)}">${renderBlockItems(section, blocks)}</div>
+    <div class="blocks-add">
+      <button type="button" onclick="addBlock('${section}', 'image')">➕ 添加图片</button>
+      <button type="button" onclick="addBlock('${section}', 'table')">📊 添加表格</button>
+      <span class="blocks-add-dim">列 <input type="number" id="newTblCols_${section}" min="1" max="20" value="3"></span>
+      <span class="blocks-add-dim">行 <input type="number" id="newTblRows_${section}" min="0" max="100" value="4"></span>
+      <span class="blocks-add-tip">新建表格为<strong>空白网格</strong>，不含任何预置内容，全部自行填写</span>
     </div>
-    <div class="image-manager" id="${section}_images">
   `;
-  for (let i = 1; i <= count; i++) {
-    html += renderImageSlot(section, i);
-  }
-  html += '</div>';
+
+  // 注：原「竞品对标表」文案编辑组已移除，表格统一由上方「内容块」自行添加
+  // 注：原「客户实绩墙与产学研体系」文案编辑组已移除（前台对应展示区已删除）
   return html;
 }
 
-function renderImageSlot(section, index) {
-  const caption = DataManager.getValue(section, 'image' + index + '_caption');
-  const description = DataManager.getValue(section, 'image' + index + '_description');
-  const imgUrl = DataManager.getImageUrl(section, index);
+// ===== 内容块（图片 / 表格）编辑器 =====
+// 约定：块顺序 = DOM 顺序；任一结构性操作（增删/排序/表格行列）都先从 DOM 收值，再整体重渲染，
+//       保证用户已输入但尚未保存的文字不会丢失。
+function blocksHolderId(section) { return 'blocks_' + section; }
+
+function collectBlocks(section) {
+  const holder = document.getElementById(blocksHolderId(section));
+  if (!holder) return DataManager.getBlocks(section);
+  const blocks = [];
+  Array.prototype.forEach.call(holder.querySelectorAll('.block-item'), function (item) {
+    const type = item.dataset.type;
+    const id = item.dataset.id || '';
+    const val = function (sel) { const el = item.querySelector(sel); return el ? el.value : ''; };
+    if (type === 'table') {
+      const head = Array.prototype.map.call(item.querySelectorAll('.tbl-head-input'), el => el.value.trim());
+      const rows = Array.prototype.map.call(item.querySelectorAll('.tbl-row'), tr =>
+        Array.prototype.map.call(tr.querySelectorAll('.tbl-cell-input'), el => el.value.trim()));
+      // 高亮列：-1 = 不高亮；其余为列索引（0 起）
+      const hlRaw = parseInt(val('.tbl-hl'), 10);
+      blocks.push({
+        t: 'table', id: id,
+        title: val('.blk-title'),
+        subtitle: val('.blk-subtitle'),
+        head: head, rows: rows,
+        hl: isNaN(hlRaw) ? 1 : hlRaw
+      });
+    } else {
+      const srcEl = item.querySelector('.blk-src');
+      const rawSrc = srcEl ? srcEl.value : '';
+      blocks.push({
+        t: 'image', id: id,
+        slot: parseInt(item.dataset.slot || '0', 10) || 0,
+        // UPLOADED = 刚上传尚未落盘：保留原 src，由 saveToServer 回填真实路径
+        src: rawSrc === 'UPLOADED' ? (item.dataset.src || '') : rawSrc,
+        caption: val('.blk-caption'),
+        desc: val('.blk-desc'),
+        badge: val('.blk-badge'),
+        w: val('.blk-w'),
+        h: val('.blk-h'),
+        fit: val('.blk-fit')
+      });
+    }
+  });
+  return blocks;
+}
+
+function rerenderBlocks(section, blocks) {
+  const holder = document.getElementById(blocksHolderId(section));
+  if (!holder) return;
+  holder.innerHTML = renderBlockItems(section, blocks || collectBlocks(section));
+}
+
+// 落盘完成后，把 DataManager 里最终的图片路径同步回编辑区 DOM。
+// ★ 必要性：collectBlocks 以 DOM 为唯一来源，而隐藏的 .blk-src 可能停留在「上传前的空值」。
+//   用户在 A 板块传完图后去改 B 板块、再点一次保存时，collectBlocks(A) 读到空 src 就会把
+//   刚落盘的好路径覆盖掉，表现为「图片换成自己的了，改完别处一保存又变回默认图」。
+//   落盘后立刻回写，DOM 与实际数据就永远一致，二次保存也不会丢图。
+function syncBlockImageSrcs() {
+  DataManager.sections.forEach(function (section) {
+    const holder = document.getElementById(blocksHolderId(section));
+    if (!holder) return;
+    const byId = {};
+    DataManager.getBlocks(section).forEach(b => { byId[String(b.id)] = b; });
+    Array.prototype.forEach.call(holder.querySelectorAll('.block-item'), function (item) {
+      if (item.dataset.type !== 'image') return;
+      const b = byId[String(item.dataset.id || '')];
+      if (!b) return;
+      const srcEl = item.querySelector('.blk-src');
+      // 一律回写最终路径：'UPLOADED' 只是「等落盘」的临时标记，落盘后即失效。
+      // 即使保存期间又传了新图，该图的 base64 仍在覆盖字典里，下次保存会以它为准落盘。
+      if (srcEl) srcEl.value = b.src || '';
+      item.dataset.src = b.src || '';
+      const prev = item.querySelector('.blk-preview');
+      if (prev && b.src) {
+        prev.onerror = null;
+        prev.src = DataManager.getBlockImageUrl(section, b);
+      }
+    });
+  });
+}
+
+function renderBlockItems(section, blocks) {
+  return blocks.map((b, i) => renderBlockItem(section, b, i, blocks.length)).join('');
+}
+
+function renderBlockItem(section, block, index, total) {
+  const moveBtns = `
+    <button type="button" class="blk-move" title="上移" ${index === 0 ? 'disabled' : ''} onclick="moveBlock('${section}', ${index}, -1)">↑</button>
+    <button type="button" class="blk-move" title="下移" ${index === total - 1 ? 'disabled' : ''} onclick="moveBlock('${section}', ${index}, 1)">↓</button>
+    <button type="button" class="blk-del" title="删除该块" onclick="removeBlock('${section}', ${index})">🗑 删除</button>`;
+  const head = `
+    <div class="blk-head">
+      <span class="blk-type ${block.t === 'table' ? 'is-table' : 'is-image'}">${block.t === 'table' ? '📊 表格块' : '🖼️ 图片块'}</span>
+      <span class="blk-order">第 ${index + 1} 位</span>
+      <span class="blk-actions">${moveBtns}</span>
+    </div>`;
+  return '<div class="block-item" data-type="' + block.t + '" data-id="' + escapeAttr(block.id || '') +
+    '" data-slot="' + (block.slot || 0) + '" data-src="' + escapeAttr(block.src || '') + '">' +
+    head + (block.t === 'table' ? renderTableBlockFields(section, block, index) : renderImageBlockFields(section, block, index)) +
+    '</div>';
+}
+
+function renderImageBlockFields(section, block, index) {
+  const imgUrl = DataManager.getBlockImageUrl(section, block);
   return `
-    <div class="image-slot" id="slot_${section}_${index}">
-      <img src="${imgUrl}" alt="图片${index}" id="preview_${section}_${index}"
-        onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 260 140\\'%3E%3Crect width=\\'260\\' height=\\'140\\' fill=\\'%23eceff1\\'/%3E%3Ctext x=\\'130\\' y=\\'70\\' text-anchor=\\'middle\\' font-size=\\'14\\' fill=\\'%2390a4ae\\'%3E暂无图片%3C/text%3E%3C/svg%3E'">
-      <input type="text" class="slot-input" placeholder="图片标题" value="${escapeAttr(caption)}" id="caption_${section}_${index}">
-      <input type="text" class="slot-input" placeholder="图片描述" value="${escapeAttr(description)}" id="desc_${section}_${index}">
-      <label class="upload-btn">
-        上传/替换图片
-        <input type="file" accept="image/*" onchange="handleImageUpload(event, '${section}', ${index})">
-      </label>
-      <button class="remove-btn" onclick="removeImage('${section}', ${index})">删除图片</button>
-    </div>
-  `;
+    <div class="blk-body">
+      <div class="blk-img-col">
+        <img src="${imgUrl}" alt="预览" class="blk-preview" id="blkpreview_${section}_${index}"
+          onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 260 140\\'%3E%3Crect width=\\'260\\' height=\\'140\\' fill=\\'%23eceff1\\'/%3E%3Ctext x=\\'130\\' y=\\'70\\' text-anchor=\\'middle\\' font-size=\\'14\\' fill=\\'%2390a4ae\\'%3E暂无图片%3C/text%3E%3C/svg%3E'">
+        <label class="upload-btn">
+          上传/替换图片
+          <input type="file" accept="image/*" onchange="handleBlockImageUpload(event, '${section}', ${index})">
+        </label>
+        <button type="button" class="remove-btn" onclick="clearBlockImage('${section}', ${index})">移除图片</button>
+      </div>
+      <div class="blk-fields">
+        <input type="hidden" class="blk-src" value="${escapeAttr(block.src || '')}">
+        <input type="text" class="blk-caption slot-input" placeholder="图片标题" value="${escapeAttr(block.caption || '')}">
+        <input type="text" class="blk-desc slot-input" placeholder="图片描述" value="${escapeAttr(block.desc || '')}">
+        <input type="text" class="blk-badge slot-input" placeholder="卡片角标（留空则不显示）" value="${escapeAttr(block.badge || '')}">
+        <div class="blk-size-row">
+          <label>显示宽度</label>
+          <input type="text" class="blk-w" placeholder="留空自适应，如 200 / 200px / 50%" value="${escapeAttr(block.w || '')}">
+          <label>显示高度</label>
+          <input type="text" class="blk-h" placeholder="留空默认 220px，如 120 / 120px / 60%" value="${escapeAttr(block.h || '')}">
+          <label>填充方式</label>
+          <select class="blk-fit">
+            <option value="cover"${block.fit === 'contain' ? '' : ' selected'}>裁切填满</option>
+            <option value="contain"${block.fit === 'contain' ? ' selected' : ''}>完整缩放</option>
+          </select>
+        </div>
+        <p class="blk-size-tip">填纯数字按像素处理；只填宽度时高度按原图比例自动缩放；「完整缩放」下图片会整体缩小、不被裁切。</p>
+      </div>
+    </div>`;
+}
+
+function renderTableBlockFields(section, block, index) {
+  const cols = block.head.length;
+  const titleInput = (block.title || '');
+  const subtitleInput = (block.subtitle || '');
+  const toolbarAdd = `
+      <div class="tbl-toolbar">
+        <button type="button" onclick="addTableCol('${section}', ${index})">＋ 添加列</button>
+        <button type="button" onclick="addTableRow('${section}', ${index})">＋ 添加行</button>
+      </div>`;
+  // 0 列：空表格，不显示任何模板列，只给出添加引导
+  if (!cols) {
+    return `
+    <div class="blk-body blk-body-table">
+      <input type="text" class="blk-title slot-input" placeholder="表格标题（留空则不显示）" value="${escapeAttr(titleInput)}">
+      <input type="text" class="blk-subtitle slot-input" placeholder="表格副标题（可选）" value="${escapeAttr(subtitleInput)}">${toolbarAdd}
+      <div class="tbl-empty">当前没有任何列，前台不会显示该表格。点击「＋ 添加列」自行创建结构。</div>
+    </div>`;
+  }
+  const headInputs = block.head.map((h, c) => `
+    <div class="tbl-cell">
+      <input type="text" class="tbl-head-input" placeholder="第 ${c + 1} 列表头" value="${escapeAttr(h)}">
+      <button type="button" class="tbl-x" title="删除该列" onclick="removeTableCol('${section}', ${index}, ${c})">✕</button>
+    </div>`).join('');
+  const rowsHtml = block.rows.map((row, r) => `
+    <tr class="tbl-row">
+      ${block.head.map((_, c) => '<td><input type="text" class="tbl-cell-input" placeholder="第 ' + (r + 1) + ' 行第 ' + (c + 1) + ' 列" value="' + escapeAttr(row[c] || '') + '"></td>').join('')}
+      <td class="tbl-row-ops"><button type="button" class="tbl-x" title="删除该行" onclick="removeTableRow('${section}', ${index}, ${r})">✕</button></td>
+    </tr>`).join('');
+  const curHl = (block.hl === 0 || block.hl > 0 || block.hl === -1) ? parseInt(block.hl, 10) : 1;
+  const hlOptions = '<option value="-1"' + (curHl === -1 ? ' selected' : '') + '>不高亮</option>' +
+    block.head.map((h, c) =>
+      '<option value="' + c + '" ' + (curHl === c ? 'selected' : '') + '>第 ' + (c + 1) + ' 列' + (h ? '（' + escapeHtml(h) + '）' : '') + '</option>').join('');
+  return `
+    <div class="blk-body blk-body-table">
+      <input type="text" class="blk-title slot-input" placeholder="表格标题（留空则不显示）" value="${escapeAttr(titleInput)}">
+      <input type="text" class="blk-subtitle slot-input" placeholder="表格副标题（可选）" value="${escapeAttr(subtitleInput)}">
+      <div class="tbl-toolbar">
+        <span>高亮列：</span>
+        <select class="tbl-hl">${hlOptions || '<option value="0">第 1 列</option>'}</select>
+        <button type="button" onclick="addTableCol('${section}', ${index})">＋ 添加列</button>
+        <button type="button" onclick="addTableRow('${section}', ${index})">＋ 添加行</button>
+      </div>
+      <table class="tbl-editor">
+        <thead><tr>${headInputs}<th></th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
+}
+
+// ===== 内容块：增 / 删 / 排序 =====
+function addBlock(section, type) {
+  const blocks = collectBlocks(section);
+  // ★ 必须基于「当前块列表」计算 id：连续添加时新块还没写回 DataManager，
+  //   用 DataManager 状态算会得到重复 id，进而出现「换一张图，其它图跟着变」
+  const id = DataManager.newBlockId(section, blocks);
+  if (type === 'table') {
+    // 新建表格一律为「空白网格」：不预置任何标题 / 表头 / 单元格文案，行列结构由上方「列 / 行」决定
+    const colsEl = document.getElementById('newTblCols_' + section);
+    const rowsEl = document.getElementById('newTblRows_' + section);
+    const colCount = Math.min(20, Math.max(1, parseInt(colsEl && colsEl.value, 10) || 3));
+    const rowCount = Math.min(100, Math.max(0, parseInt(rowsEl && rowsEl.value, 10) || 0));
+    const head = [];
+    for (let c = 0; c < colCount; c++) head.push('');
+    const rows = [];
+    for (let r = 0; r < rowCount; r++) rows.push(head.map(() => ''));
+    blocks.push({ t: 'table', id: id, title: '', subtitle: '', head: head, rows: rows, hl: 0 });
+  } else {
+    blocks.push({ t: 'image', id: id, slot: 0, src: '', caption: '', desc: '', badge: '', w: '', h: '' });
+  }
+  rerenderBlocks(section, blocks);
+  showToast(type === 'table' ? '已添加表格块，编辑后点击保存' : '已添加图片块，上传图片后点击保存');
+}
+
+function removeBlock(section, index) {
+  const blocks = collectBlocks(section);
+  const removed = blocks.splice(index, 1)[0];
+  if (removed && removed.id) DataManager.removeImage(section, 'bk' + removed.id);
+  rerenderBlocks(section, blocks);
+  showToast('内容块已删除，点击保存生效');
+}
+
+function moveBlock(section, index, delta) {
+  const blocks = collectBlocks(section);
+  const target = index + delta;
+  if (target < 0 || target >= blocks.length) return;
+  const tmp = blocks[index];
+  blocks[index] = blocks[target];
+  blocks[target] = tmp;
+  rerenderBlocks(section, blocks);
+}
+
+// ===== 表格块：行列增删 =====
+function addTableCol(section, index) {
+  const blocks = collectBlocks(section);
+  const b = blocks[index];
+  if (!b || b.t !== 'table') return;
+  b.head.push(''); // 新增列为空白，不预置「新列」等模板文字
+  b.rows.forEach(r => r.push(''));
+  rerenderBlocks(section, blocks);
+}
+
+function removeTableCol(section, index, col) {
+  const blocks = collectBlocks(section);
+  const b = blocks[index];
+  if (!b || b.t !== 'table' || !b.head.length) return;
+  b.head.splice(col, 1);
+  b.rows.forEach(r => r.splice(col, 1));
+  // 允许一直删到 0 列（空表格不渲染任何内容，不做模板兜底）
+  b.hl = b.head.length ? Math.min(parseInt(b.hl, 10) || 0, b.head.length - 1) : 0;
+  rerenderBlocks(section, blocks);
+}
+
+function addTableRow(section, index) {
+  const blocks = collectBlocks(section);
+  const b = blocks[index];
+  if (!b || b.t !== 'table') return;
+  b.rows.push(b.head.map(() => ''));
+  rerenderBlocks(section, blocks);
+}
+
+function removeTableRow(section, index, row) {
+  const blocks = collectBlocks(section);
+  const b = blocks[index];
+  if (!b || b.t !== 'table') return;
+  b.rows.splice(row, 1);
+  rerenderBlocks(section, blocks);
+}
+
+// ===== 图片块：上传（带裁剪）/ 移除 =====
+function handleBlockImageUpload(event, section, index) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) {
+    showToast('图片大小不能超过 8MB', true);
+    return;
+  }
+  event.target.value = '';
+  openCropModal(file, function (base64) {
+    const blocks = collectBlocks(section);
+    const b = blocks[index];
+    if (!b) return;
+    // 未落盘的上传：base64 存入覆盖字典（saveToServer 落盘为 images/<prefix>-bk<id>.jpg），
+    // 并用 UPLOADED 标记提示收集逻辑「保留原 src，等落盘后回填真实路径」
+    DataManager.saveImage(section, 'bk' + b.id, base64);
+    rerenderBlocks(section, blocks);
+    const items = document.querySelectorAll('#' + blocksHolderId(section) + ' .block-item');
+    const srcInput = items[index] ? items[index].querySelector('.blk-src') : null;
+    if (srcInput) srcInput.value = 'UPLOADED';
+    const preview = document.getElementById('blkpreview_' + section + '_' + index);
+    if (preview) { preview.onerror = null; preview.src = base64; }
+    showToast('图片已裁剪上传，点击下方保存即可生效');
+  });
+}
+
+function clearBlockImage(section, index) {
+  const blocks = collectBlocks(section);
+  const b = blocks[index];
+  if (!b) return;
+  if (b.id) DataManager.removeImage(section, 'bk' + b.id);
+  b.src = '';
+  rerenderBlocks(section, blocks);
+  showToast('图片已移除，点击保存生效');
 }
 
 // ===== 渲染联系信息编辑器 =====
-function renderContactEditor() {
-  const title = DataManager.getValue('contact', 'section_title') || '联系我们 & 在线询价';
-  const desc = DataManager.getValue('contact', 'section_description') || '迈德瑞智能装备为您提供快速选型建议、技术图纸匹配与专业报价，技术工程师团队2小时内极速响应';
-  const company = DataManager.getValue('contact', 'company_name') || '迈德瑞（淮安）智能装备科技有限公司';
-  const phone = DataManager.getValue('contact', 'phone') || '400-888-9999 / 0517-88886666';
-  const email = DataManager.getValue('contact', 'email') || 'sales@magdrive-tech.com';
-  const address = DataManager.getValue('contact', 'address') || '江苏省淮安经济技术开发区南马厂街道内湖路82号经管站103室';
-  const hours = DataManager.getValue('contact', 'hours') || '周一至周五 08:30 - 18:00';
-  const creditCode = DataManager.getValue('contact', 'credit_code') || '91320891MAKML1457M';
-  const legalPerson = DataManager.getValue('contact', 'legal_person') || '张剑';
-  const registeredCapital = DataManager.getValue('contact', 'registered_capital') || '450万元整';
-  const formTitle = DataManager.getValue('contact', 'form_title') || '在线询价与工况定制';
-  const formSubtitle = DataManager.getValue('contact', 'form_subtitle') || '请提交您的产品型号、工况参数或技术要求，我们将安排工程师为您对接';
-  const licenseImg = DataManager.getMetaImage('license') || 'images/business_license.jpg';
+// 取值助手：只在该字段「从未配置过」时才用内置默认值兜底。
+// ★ 不能用 `getValue(...) || 默认值`：那样用户把字段清空后一保存，默认值又被写回 CSV，
+//   表现为「清空了却删不掉」——统一社会信用代码就是靠留空来隐藏的，必须能真正存成空。
+function contactVal(field, fallback) {
+  const v = DataManager.getStoredValue('contact', field);
+  return (v === undefined || v === null) ? fallback : v;
+}
 
+function renderContactEditor() {
+  const title = contactVal('section_title', '联系我们 & 在线询价');
+  const desc = contactVal('section_description', '迈德瑞智能装备为您提供快速选型建议、技术图纸匹配与专业报价，技术工程师团队2小时内极速响应');
+  const company = contactVal('company_name', '迈德瑞（淮安）智能装备科技有限公司');
+  const phone = contactVal('phone', '400-888-9999 / 0517-88886666');
+  const email = contactVal('email', 'sales@magdrive-tech.com');
+  const address = contactVal('address', '江苏省淮安经济技术开发区南马厂街道内湖路82号经管站103室');
+  const hours = contactVal('hours', '周一至周五 08:30 - 18:00');
+  const creditCode = contactVal('credit_code', '91320891MAKML1457M');
+  const legalPerson = contactVal('legal_person', '张剑');
+  const registeredCapital = contactVal('registered_capital', '450万元整');
+  const formTitle = contactVal('form_title', '在线询价与工况定制');
+  const formSubtitle = contactVal('form_subtitle', '请提交您的产品型号、工况参数或技术要求，我们将安排工程师为您对接');
   return `
     <h3 style="margin-bottom:20px;color:#0d47a1;">联系我们与在线询盘板块设置</h3>
+    <!-- 板块背景图管理（上传 / 替换 / 删除） -->
+    ${renderSectionBgControl('contact')}
     <div class="form-group">
       <label>板块标题</label>
       <input type="text" id="contact_section_title" value="${escapeAttr(title)}">
@@ -288,20 +756,13 @@ function renderContactEditor() {
       </div>
     </div>
 
-    <!-- 营业执照上传管理 -->
-    <div class="form-group" style="padding:16px;background:var(--primary-light);border-radius:8px;margin-top:12px;">
-      <label style="color:var(--primary-dark);font-size:15px;margin-bottom:10px;">📜 企业营业执照资质图片</label>
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <img id="license_preview" src="${licenseImg}" style="width:120px;height:80px;object-fit:contain;border:2px solid var(--border);border-radius:6px;background:#fff;">
-        <div>
-          <label class="upload-btn" style="display:inline-block;padding:8px 16px;background:var(--primary);color:#fff;border-radius:6px;font-size:13px;cursor:pointer;">
-            上传/替换营业执照
-            <input type="file" accept="image/*" style="display:none;" onchange="handleMetaImageUpload(event, 'license', 'license_preview')">
-          </label>
-          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">支持裁剪上传高清营业执照或资质证书，访客可在前台点击放大查看</div>
-        </div>
-      </div>
-    </div>
+    <!-- 营业执照上传管理（复用通用图片控件） -->
+    ${renderMetaImageControl(
+      'license',
+      '📜 企业营业执照资质图片',
+      '支持裁剪上传高清营业执照或资质证书，访客可在前台点击放大查看。',
+      { width: 120, height: 80, fit: 'contain', deleteLabel: '恢复默认执照' }
+    )}
 
     <div class="form-group" style="margin-top:16px;">
       <label>询价表单主标题</label>
@@ -311,6 +772,12 @@ function renderContactEditor() {
       <label>询价表单引导说明</label>
       <input type="text" id="contact_form_subtitle" value="${escapeAttr(formSubtitle)}">
     </div>
+
+    <!-- 联系板块附加文字（条目标题、执照卡片说明等） -->
+    ${renderTextGroup('contact_info')}
+
+    <!-- 在线选型表单文字（标签、占位提示、下拉选项、按钮与提示语） -->
+    ${renderTextGroup('contact_form')}
   `;
 }
 
@@ -416,6 +883,23 @@ function exportInquiriesCSV() {
 }
 
 // ===== 切换 Tab =====
+// ===== 后台标签栏渲染（标签文字支持自定义，见「首页与通用文案」Tab）=====
+function renderAdminTabsInner(currentId) {
+  return DataManager.ADMIN_TAB_ORDER.map(id => {
+    const cls = 'admin-tab' + (id === currentId ? ' active' : '');
+    return `<button class="${cls}" onclick="switchTab('${id}')">${escapeHtml(DataManager.getAdminTabLabel(id))}</button>`;
+  }).join('');
+}
+
+// 重新渲染顶部标签栏，并保留当前选中的标签
+function refreshAdminTabs() {
+  const holder = document.getElementById('adminTabs');
+  if (!holder) return;
+  const activeBtn = holder.querySelector('.admin-tab.active');
+  const m = activeBtn ? String(activeBtn.getAttribute('onclick') || '').match(/'([^']+)'/) : null;
+  holder.innerHTML = renderAdminTabsInner(m ? m[1] : (DataManager.sections[0] || 'texts'));
+}
+
 function switchTab(section) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -431,24 +915,8 @@ function switchTab(section) {
   }
 }
 
-// ===== 更新图片数量 =====
-function updateImageCount(section) {
-  const input = document.getElementById(section + '_image_count');
-  let count = parseInt(input.value) || 1;
-  if (count < 1) count = 1;
-  if (count > 20) count = 20;
-  DataManager.setImageCount(section, count);
-
-  const container = document.getElementById(section + '_images');
-  container.innerHTML = '';
-  for (let i = 1; i <= count; i++) {
-    container.insertAdjacentHTML('beforeend', renderImageSlot(section, i));
-  }
-  showToast('图片数量已更新为 ' + count + '，请点击下方保存');
-}
-
-// ===== 图片上传（带裁剪）=====
-function handleImageUpload(event, section, index) {
+// ===== 全局图片上传（Logo / 首页背景图 / 首页主图 / 板块背景图，带裁剪）=====
+function handleMetaImageUpload(event, key, previewId, holderId) {
   const file = event.target.files[0];
   if (!file) return;
   if (file.size > 8 * 1024 * 1024) {
@@ -457,69 +925,30 @@ function handleImageUpload(event, section, index) {
   }
   event.target.value = '';
   openCropModal(file, function(base64) {
-    const preview = document.getElementById('preview_' + section + '_' + index);
-    if (preview) {
-      preview.onerror = null;
-      preview.src = base64;
-    }
     try {
-      DataManager.saveImage(section, index, base64);
-      showToast('图片已裁剪完毕，点击下方保存即可生效');
+      DataManager.saveMetaImage(key, base64);
     } catch (err) {
       showToast(err.message || '图片存储失败', true);
+      return;
     }
-  });
-}
-
-// ===== 删除图片 =====
-function removeImage(section, index) {
-  DataManager.removeImage(section, index);
-  const preview = document.getElementById('preview_' + section + '_' + index);
-  if (preview) {
-    const prefix = DataManager.imagePrefix[section] || section;
-    preview.src = 'images/' + prefix + '-' + index + '.svg';
-    preview.onerror = function() {
-      this.onerror = null;
-      this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 140'%3E%3Crect width='260' height='140' fill='%23eceff1'/%3E%3Ctext x='130' y='70' text-anchor='middle' font-size='14' fill='%2390a4ae'%3E暂无图片%3C/text%3E%3C/svg%3E";
-    };
-  }
-  showToast('图片已删除，请点击保存');
-}
-
-// ===== 全局图片上传（Logo、Hero背景，带裁剪）=====
-function handleMetaImageUpload(event, key, previewId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 8 * 1024 * 1024) {
-    showToast('图片大小不能超过 8MB', true);
-    return;
-  }
-  event.target.value = '';
-  openCropModal(file, function(base64) {
+    // 先重渲染控件：按钮文案切换为「替换图片」并出现删除按钮
+    if (holderId) refreshMetaImageControl(holderId);
+    // 再把预览图显式指向刚上传的图片（后端模式下 CSV 旧值优先，必须覆盖预览）
     const preview = document.getElementById(previewId);
     if (preview) {
       preview.onerror = null;
       preview.src = base64;
       preview.style.display = '';
     }
-    try {
-      DataManager.saveMetaImage(key, base64);
-      showToast('图片已裁剪上传，请点击保存');
-    } catch (err) {
-      showToast(err.message || '图片存储失败', true);
-    }
+    showToast('图片已裁剪上传，点击下方保存即可生效');
   });
 }
 
-// ===== 删除全局图片 =====
-function removeMetaImageUpload(key, previewId) {
+// ===== 删除全局图片 / 恢复默认图片 =====
+function removeMetaImageUpload(key, previewId, holderId) {
   DataManager.removeMetaImage(key);
-  const preview = document.getElementById(previewId);
-  if (preview) {
-    preview.src = '';
-    preview.style.display = 'none';
-  }
-  showToast('图片已删除，请点击保存');
+  if (holderId) refreshMetaImageControl(holderId);
+  showToast('图片已删除，点击下方保存即可生效');
 }
 
 // ===== 保存所有更改（支持本地磁盘落盘）=====
@@ -534,24 +963,34 @@ async function saveAll() {
     // 1. 保存 meta
     DataManager.setValue('meta', 'site_title', document.getElementById('meta_site_title').value);
     DataManager.setValue('meta', 'site_subtitle', document.getElementById('meta_site_subtitle').value);
+    // 1.0 前台导航栏名称：若「首页与通用文案 → 🌐 前台导航栏名称」的逐项编辑被改动过（dirty），
+    //     则以逐项编辑为准汇总写回 meta.nav_text，并同步「全局设置」里的整串输入框；
+    //     未改动时保持整串输入框原值，两个编辑入口互不覆盖
+    const navHolder = document.getElementById('navItemsHolder');
+    const navItemEls = navHolder ? navHolder.querySelectorAll('.nav-item-input') : [];
+    if (navHolder && navHolder.dataset.dirty === '1' && navItemEls.length) {
+      const joined = Array.prototype.map.call(navItemEls, el => el.value.trim()).filter(Boolean).join(',');
+      const navRaw = document.getElementById('meta_nav_text');
+      if (navRaw) navRaw.value = joined;
+    }
     DataManager.setValue('meta', 'nav_text', document.getElementById('meta_nav_text').value);
     DataManager.setValue('meta', 'footer_text', document.getElementById('meta_footer_text').value);
     DataManager.setValue('meta', 'header_bg_color', document.getElementById('meta_header_bg_color').value);
     DataManager.setValue('meta', 'hero_bg_color', document.getElementById('meta_hero_bg_color').value);
     DataManager.setValue('meta', 'hero_title_color', document.getElementById('meta_hero_title_color').value);
 
-    // 2. 保存四大核心板块
+    // 1.5 保存后台标签栏名称（后台界面自身的 UI 文案）
+    DataManager.ADMIN_TAB_ORDER.forEach(tabId => {
+      const el = document.getElementById('admintab_' + tabId);
+      if (el) DataManager.setValue('meta', 'admin_tab_' + tabId, el.value.trim());
+    });
+
+    // 2. 保存四大核心板块（内容块：图片 / 表格，顺序与 DOM 一致）
     DataManager.sections.forEach(section => {
       DataManager.setValue(section, 'section_title', document.getElementById(section + '_section_title').value);
       DataManager.setValue(section, 'section_description', document.getElementById(section + '_section_description').value);
       DataManager.setValue(section, 'text_position', document.getElementById(section + '_text_position').value);
-      const count = DataManager.getImageCount(section);
-      for (let i = 1; i <= count; i++) {
-        const captionEl = document.getElementById('caption_' + section + '_' + i);
-        const descEl = document.getElementById('desc_' + section + '_' + i);
-        if (captionEl) DataManager.setValue(section, 'image' + i + '_caption', captionEl.value);
-        if (descEl) DataManager.setValue(section, 'image' + i + '_description', descEl.value);
-      }
+      DataManager.setBlocks(section, collectBlocks(section));
     });
 
     // 3. 保存联系信息与企业资质
@@ -570,8 +1009,18 @@ async function saveAll() {
       DataManager.setValue('contact', 'registered_capital', document.getElementById('contact_registered_capital').value);
     }
 
+    // 3.5 保存全站可编辑文案（首页 Hero / 指标看板 / 对标表 / 客户墙 / 表单等）
+    DataManager.TEXTS.forEach(t => {
+      const el = document.getElementById('texts_' + t.key);
+      if (el) DataManager.setValue('texts', t.key, el.value);
+    });
+
     // 4. 发送到服务端直接持久化落盘
     const res = await DataManager.saveToServer();
+    // 把落盘后的真实图片路径回写编辑器，避免下次保存时 DOM 里的旧空值覆盖掉它
+    syncBlockImageSrcs();
+    // 标签栏名称可能被改动，保存后立刻刷新顶部标签栏
+    refreshAdminTabs();
     showToast(res.message || '🎉 所有更改已成功保存并落盘！');
   } catch (err) {
     showToast('保存异常: ' + err.message, true);
@@ -594,10 +1043,15 @@ async function handleResetDefaults() {
 }
 
 // ===== 导出 CSV =====
-function exportData() {
-  saveAll();
-  DataManager.exportCSV();
-  showToast('CSV 文件已导出下载');
+async function exportData() {
+  try {
+    // 先同步保存当前表单内容，确保导出的 CSV 与页面修改一致
+    await saveAll();
+    DataManager.exportCSV('content');
+    showToast('CSV 文件已导出下载');
+  } catch (err) {
+    showToast('导出失败: ' + err.message, true);
+  }
 }
 
 // ===== Toast 提示 =====
@@ -705,91 +1159,5 @@ function closeCropModal() {
     cropperInstance = null;
   }
   cropCallback = null;
-}
-
-// ===== 修改密码模态弹窗控制 =====
-function openPasswordModal() {
-  const modal = document.getElementById('passwordModal');
-  const errorEl = document.getElementById('pwdErrorMsg');
-  const form = document.getElementById('changePasswordForm');
-  if (modal) {
-    if (form) form.reset();
-    if (errorEl) {
-      errorEl.textContent = '';
-      errorEl.style.display = 'none';
-    }
-    modal.style.display = 'flex';
-    setTimeout(() => {
-      document.getElementById('oldPassword').focus();
-    }, 100);
-  }
-}
-
-function closePasswordModal() {
-  const modal = document.getElementById('passwordModal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
-}
-
-async function handleChangePassword(e) {
-  e.preventDefault();
-  const oldPwd = document.getElementById('oldPassword').value.trim();
-  const newPwd = document.getElementById('newPassword').value.trim();
-  const confirmPwd = document.getElementById('confirmPassword').value.trim();
-  const errorEl = document.getElementById('pwdErrorMsg');
-  const submitBtn = document.getElementById('btnSubmitPwd');
-
-  if (errorEl) {
-    errorEl.textContent = '';
-    errorEl.style.display = 'none';
-  }
-
-  if (newPwd.length < 6) {
-    if (errorEl) {
-      errorEl.textContent = '新密码长度至少需要 6 个字符';
-      errorEl.style.display = 'block';
-    }
-    return;
-  }
-
-  if (newPwd !== confirmPwd) {
-    if (errorEl) {
-      errorEl.textContent = '两次输入的新密码不一致，请核对';
-      errorEl.style.display = 'block';
-    }
-    return;
-  }
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = '正在修改...';
-  }
-
-  try {
-    const res = await DataManager.changePassword(oldPwd, newPwd);
-    closePasswordModal();
-    showToast(res.message || '🎉 密码修改成功！请重新登录');
-    
-    // 延迟 1.5 秒登出并提示重新登录
-    setTimeout(() => {
-      handleLogout();
-      const loginErr = document.getElementById('loginError');
-      if (loginErr) {
-        loginErr.style.color = '#15803d';
-        loginErr.textContent = '密码已修改成功，请使用新密码登录';
-      }
-    }, 1500);
-  } catch (err) {
-    if (errorEl) {
-      errorEl.textContent = err.message || '修改失败，请重试';
-      errorEl.style.display = 'block';
-    }
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = '确认修改';
-    }
-  }
 }
 

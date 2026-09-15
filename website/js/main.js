@@ -14,7 +14,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   initBackToTop();
   initScrollspy();
   initHeroEvents();
+  initCompareAnchorFallback();
 });
+
+// Hero「参数对标」按钮锚点兜底：原内置对标表已改为内容块，
+// 若性能参数板块当前没有表格块（无 #compare 锚点），则回退跳转到该板块本身。
+function initCompareAnchorFallback() {
+  const btn = document.getElementById("heroBtn2");
+  if (!btn || document.getElementById("compare")) return;
+  btn.setAttribute("href", "#performance");
+}
 
 // ===== 页面整体渲染 =====
 function renderPage() {
@@ -24,7 +33,7 @@ function renderPage() {
   const siteTitle = DataManager.getValue("meta", "site_title") || "迈德瑞（淮安）智能装备科技有限公司";
   const siteTitleEl = document.getElementById("siteTitle");
   if (siteTitleEl) siteTitleEl.textContent = siteTitle;
-  document.title = siteTitle + " - MagDrive 高温磁力泵与关键装备";
+  document.title = siteTitle + (T("title_suffix") || "");
 
   // 2. 自定义导航文字
   renderNavigation();
@@ -40,6 +49,37 @@ function renderPage() {
       hero.style.background = "linear-gradient(135deg, " + heroBgColor + " 0%, #06152b 100%)";
     }
   }
+
+  // 3.1 网站副标题（后台「网站副标题」字段 -> Hero 副标题行）
+  const siteSubtitle = DataManager.getValue("meta", "site_subtitle");
+  const heroSubtitleEl = document.getElementById("heroSubtitle");
+  if (heroSubtitleEl) {
+    if (siteSubtitle) {
+      heroSubtitleEl.textContent = siteSubtitle;
+      heroSubtitleEl.style.display = "";
+    } else {
+      // 未配置时隐藏副标题行，避免出现空行
+      heroSubtitleEl.style.display = "none";
+    }
+  }
+
+  // 3.2 主标题文字颜色
+  const heroTitleColor = DataManager.getValue("meta", "hero_title_color");
+  const heroTitleEl = document.getElementById("heroTitle");
+  if (heroTitleEl && heroTitleColor) {
+    heroTitleEl.style.color = heroTitleColor;
+  }
+
+  // 3.3 Hero 首屏全部文案 + 五大指标看板（后台「首页与通用文案」驱动）
+  renderHeroTexts();
+
+  // 3.4 页面杂项文字（管理后台链接、移动端抽屉标题等）
+  const adminLink = document.getElementById("adminLink");
+  if (adminLink) adminLink.textContent = T("admin_link");
+  const mobileNavTitle = document.getElementById("mobileNavTitle");
+  if (mobileNavTitle) mobileNavTitle.textContent = T("mobile_nav_title");
+  const mobileAdminLink = document.getElementById("mobileAdminLink");
+  if (mobileAdminLink) mobileAdminLink.textContent = T("mobile_admin_link");
 
   // 4. 自定义页脚文字
   const footerText = DataManager.getValue("meta", "footer_text");
@@ -57,6 +97,93 @@ function renderPage() {
 
   // 6. 渲染「联系我们 / 在线工况选型」板块
   main.appendChild(renderContactSection());
+}
+
+// ===== 全站文案读取辅助 =====
+// 从 texts 目录取值；默认值已内置，未配置时返回空字符串
+function T(key) {
+  return DataManager.getValue("texts", key) || "";
+}
+
+// 富文本标题渲染：换行 -> <br>，**文字** -> 渐变高亮 span
+function renderRichTitle(raw) {
+  const lines = String(raw || "").split(/\r?\n/);
+  return lines
+    .map(line => escapeHtml(line).replace(/\*\*(.+?)\*\*/g, '<span class="gradient-text">$1</span>'))
+    .join("<br>");
+}
+
+// ===== Hero 首屏文案渲染 =====
+function renderHeroTexts() {
+  // 顶部小标语
+  const preTitle = document.getElementById("heroPreTitle");
+  if (preTitle) preTitle.textContent = T("hero_pre_title");
+
+  // 主标题（支持换行与 **渐变高亮** 语法）
+  const heroTitle = document.getElementById("heroTitle");
+  if (heroTitle) heroTitle.innerHTML = renderRichTitle(T("hero_title"));
+
+  // 技术说明段
+  const heroDesc = document.getElementById("heroDesc");
+  if (heroDesc) heroDesc.textContent = T("hero_desc");
+
+  // 亮点徽章（留空的徽章自动隐藏）
+  const badgesBox = document.getElementById("heroBadges");
+  if (badgesBox) {
+    const badges = [1, 2, 3, 4].map(i => T("hero_badge_" + i)).filter(Boolean);
+    badgesBox.innerHTML = badges.map(b => '<span class="hero-badge">' + escapeHtml(b) + '</span>').join("");
+  }
+
+  // 行动按钮文字（留空隐藏）
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById("heroBtn" + i);
+    if (btn) {
+      const text = T("hero_btn_" + i);
+      btn.textContent = text;
+      btn.style.display = text ? "" : "none";
+    }
+  }
+
+  // 右侧装备卡片浮动标签与悬浮提示
+  const tagTop = document.getElementById("heroTagTop");
+  if (tagTop) tagTop.textContent = T("hero_tag_top");
+  const tagBottom = document.getElementById("heroTagBottom");
+  if (tagBottom) tagBottom.textContent = T("hero_tag_bottom");
+  const heroCard = document.getElementById("heroCardShowcase");
+  if (heroCard) heroCard.setAttribute("title", T("hero_card_hint"));
+
+  // 首页装备主图（后台「首页与通用文案 → 首页装备主图」可上传 / 替换 / 恢复默认）
+  const heroPumpImg = document.getElementById("heroPumpImg");
+  if (heroPumpImg) {
+    const heroImage = DataManager.getMetaImage("hero_image");
+    if (heroImage) heroPumpImg.src = heroImage;
+  }
+
+  // 五大核心指标看板
+  renderHeroStats();
+}
+
+// ===== Hero 五大核心指标看板渲染 =====
+function renderHeroStats() {
+  const strip = document.getElementById("heroStatsStrip");
+  if (!strip) return;
+  strip.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const val = T("stat_" + i + "_val");
+    const unit = T("stat_" + i + "_unit");
+    const label = T("stat_" + i + "_label");
+    const sub = T("stat_" + i + "_sub");
+    if (!val && !label) continue; // 数值与名称均留空则跳过该指标
+    const item = document.createElement("div");
+    item.className = "stat-item";
+    item.innerHTML =
+      '<div class="stat-val">' + escapeHtml(val) +
+      (unit ? '<span class="stat-unit">' + escapeHtml(unit) + '</span>' : '') +
+      '</div>' +
+      '<div class="stat-label">' + escapeHtml(label) + '</div>' +
+      '<div class="stat-sub">' + escapeHtml(sub) + '</div>';
+    strip.appendChild(item);
+  }
 }
 
 // ===== 导航栏动态渲染 =====
@@ -92,7 +219,6 @@ function renderNavigation() {
 
 // ===== 渲染单个展示板块 =====
 function renderSection(section) {
-  const count = DataManager.getImageCount(section);
   const title = DataManager.getValue(section, "section_title") || DataManager.sectionLabels[section];
   const description = DataManager.getValue(section, "section_description") || "";
   const textPosition = DataManager.getValue(section, "text_position") || "above";
@@ -101,21 +227,36 @@ function renderSection(section) {
   sec.className = "content-section section-" + section;
   sec.id = section;
 
+  // 板块背景图片（后台各板块编辑器中上传，删除后回退纯色）
+  applySectionBackground(sec, section);
+
   // 标题与描述
   const header = document.createElement("div");
   header.className = "section-header";
   header.innerHTML = `
-    <div class="section-tag">${getSectionTag(section)}</div>
+    <div class="section-tag">${escapeHtml(T("section_tag_" + section))}</div>
     <h2>${escapeHtml(title)}</h2>
     <p>${escapeHtml(description)}</p>
   `;
 
-  // 图片与卡片网格
+  // 内容块容器：图片块与表格块按后台顺序混排（图片可自定义尺寸，表格可增删行列）
   const grid = document.createElement("div");
-  grid.className = "image-grid grid-" + section;
-  for (let i = 1; i <= count; i++) {
-    grid.appendChild(renderImageCard(section, i));
-  }
+  grid.className = "content-blocks blocks-" + section;
+  let imgSeq = 0;
+  let firstTableDone = false;
+  DataManager.getBlocks(section).forEach(block => {
+    if (block.t === "table") {
+      // 性能参数板块的第一个表格块沿用 #compare 锚点（Hero「参数对标」按钮跳转目标）
+      const anchor = (section === "performance" && !firstTableDone) ? "compare" : "";
+      const tableEl = renderBlockTable(block, anchor);
+      if (!tableEl) return; // 空表格（0 列）不渲染
+      if (anchor) firstTableDone = true;
+      grid.appendChild(tableEl);
+    } else {
+      imgSeq++;
+      grid.appendChild(renderImageCard(section, block, imgSeq));
+    }
+  });
 
   // 组装 DOM
   if (textPosition === "below") {
@@ -126,35 +267,34 @@ function renderSection(section) {
     sec.appendChild(grid);
   }
 
-  // 若为「性能参数」板块，追加国内外主流竞品详细参数对标表
-  if (section === "performance") {
-    sec.appendChild(renderCompareTable());
-  }
-
-  // 若为「应用工况」板块，追加权威客户供货实绩墙与产学研保障
-  if (section === "application") {
-    sec.appendChild(renderClientAndTeamShowcase());
-  }
+  // 注：原内置「竞品参数对标表」已删除，改为由后台「内容块 · 表格块」自行添加
+  // 注：原「客户实绩墙与产学研体系」展示区已移除。板块内容完全由后台「内容块」驱动，
+  //     前台不再内置任何展示模板（客户卡片 / 产学研支柱 / 表格等一概不自动注入）。
 
   return sec;
 }
 
-// 获取板块顶部的小标签
-function getSectionTag(section) {
-  const tags = {
-    product: "PRODUCT PORTFOLIO · 核心特种流体装备",
-    performance: "TECHNICAL SPECIFICATIONS · 性能指标与参数对标",
-    usage: "INSTALLATION & O&M · 标准安装与全生命周期运维",
-    application: "STRATEGIC SCENARIOS · 四大战略应用场景与实绩"
-  };
-  return tags[section] || "MAGDRIVE TECHNOLOGY";
+// ===== 应用板块背景图（带浅色蒙版保证文字可读） =====
+function applySectionBackground(el, section) {
+  const bgImg = DataManager.getMetaImage("section_bg_" + section);
+  if (bgImg) {
+    el.style.backgroundImage =
+      "linear-gradient(rgba(248,250,252,0.90), rgba(248,250,252,0.95)), url('" + bgImg + "')";
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.backgroundRepeat = "no-repeat";
+  }
 }
 
-// ===== 渲染单张图片/装备卡片 =====
-function renderImageCard(section, index) {
-  const caption = DataManager.getValue(section, "image" + index + "_caption") || (DataManager.sectionLabels[section] + " 图示 " + index);
-  const description = DataManager.getValue(section, "image" + index + "_description") || "";
-  const imgUrl = DataManager.getImageUrl(section, index);
+// ===== 渲染单张图片/装备卡片（内容块驱动，支持自定义宽高） =====
+function renderImageCard(section, block, seq) {
+  const index = seq || 1;
+  // 注：标题 / 描述一律以用户在后台填写的内容为准，未填写则不显示
+  //     （旧版本会兜底成「使用方法 图示 1」这类自动生成文字，已移除）
+  const caption = block.caption || "";
+  const description = block.desc || "";
+  const badge = block.badge || "";
+  const imgUrl = DataManager.getBlockImageUrl(section, block);
 
   // 存入画廊全局数组供 Lightbox 浏览
   const galleryIndex = galleryItems.length;
@@ -167,23 +307,75 @@ function renderImageCard(section, index) {
 
   const card = document.createElement("div");
   card.className = "image-card card-" + section;
-  card.setAttribute("title", "点击查看高清大图及结构细节");
+  card.setAttribute("title", T("card_click_hint"));
 
-  // 获取卡片特殊高亮角标
-  const badgeHtml = getCardBadge(section, index);
+  // 自定义显示尺寸（后台图片块「宽度 / 高度」，支持 px / % / 纯数字；留空则按默认网格自适应）
+  const cssW = DataManager.normalizeCssSize(block.w);
+  const rawH = String(block.h == null ? "" : block.h).trim();
+  if (cssW) {
+    card.classList.add("is-sized");
+    card.style.flex = "0 0 auto";
+    card.style.width = cssW;
+    card.style.maxWidth = "100%";
+    card.style.minWidth = "0"; // 允许真正缩小，不被内容最小宽度撑住
+  }
+  // 高度：百分比不能直接用（父级高度为 auto 会失效），换算成「相对卡片宽度的比例」
+  let autoRatio = false;
+  if (rawH && rawH !== "auto") {
+    card.classList.add("is-sized");
+    if (/^-?\d+(\.\d+)?%$/.test(rawH)) {
+      const ratio = parseFloat(rawH) / 100;
+      if (ratio > 0) card.dataset.thumbRatio = String(ratio);
+    } else {
+      card.dataset.thumbHeight = DataManager.normalizeCssSize(rawH);
+    }
+  } else if (cssW) {
+    autoRatio = true; // 只设宽度：高度按原图比例自适应，保证「整体等比缩小」
+  }
+
+  // 卡片高亮角标（后台每个图片块的「角标」字段，留空则不显示）
+  const badgeHtml = badge ? '<span class="card-badge ' + getCardBadgeClass(section, index) + '">' + escapeHtml(badge) + '</span>' : "";
+
+  // 标题与描述都为空时整块不渲染，避免留下空白文字区（只显示图片本身）
+  const bodyHtml = (caption || description) ? `
+    <div class="card-body">
+      ${caption ? '<div class="card-caption">' + escapeHtml(caption) + '</div>' : ''}
+      ${description ? '<div class="card-description">' + escapeHtml(description) + '</div>' : ''}
+    </div>` : '';
 
   card.innerHTML = `
     <div class="image-card-thumb-wrap">
       ${badgeHtml}
       <img src="${imgUrl}" alt="${escapeAttr(caption)}" loading="lazy"
         onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 400 240\'%3E%3Crect width=\'400\' height=\'240\' fill=\'%23eceff1\'/%3E%3Ctext x=\'200\' y=\'120\' text-anchor=\'middle\' font-size=\'15\' fill=\'%2390a4ae\'%3E图片加载中...%3C/text%3E%3C/svg%3E'">
-      <div class="zoom-hint">🔍 点击全屏预览</div>
+      <div class="zoom-hint">${escapeHtml(T("zoom_hint"))}</div>
     </div>
-    <div class="card-body">
-      <div class="card-caption">${escapeHtml(caption)}</div>
-      <div class="card-description">${escapeHtml(description)}</div>
-    </div>
-  `;
+    ${bodyHtml}`;
+
+  // 应用自定义高度 / 比例（DOM 生成后再设置，避免字符串拼接被转义影响）
+  const thumbWrap = card.querySelector(".image-card-thumb-wrap");
+  const thumbImg = card.querySelector("img");
+  if (thumbWrap) {
+    if (card.dataset.thumbHeight) {
+      thumbWrap.style.height = card.dataset.thumbHeight;
+      thumbWrap.style.minHeight = "0";
+    } else if (card.dataset.thumbRatio) {
+      thumbWrap.style.height = "auto";
+      thumbWrap.style.aspectRatio = "1 / " + card.dataset.thumbRatio;
+    } else if (autoRatio && thumbImg) {
+      // 只设宽度：图片加载后按原始宽高比收缩缩略图区，图片整体等比变小
+      const applyNaturalRatio = () => {
+        if (thumbImg.naturalWidth && thumbImg.naturalHeight) {
+          thumbWrap.style.height = "auto";
+          thumbWrap.style.aspectRatio = thumbImg.naturalWidth + " / " + thumbImg.naturalHeight;
+        }
+      };
+      thumbImg.addEventListener("load", applyNaturalRatio);
+      if (thumbImg.complete) applyNaturalRatio(); // 命中缓存时 load 可能已触发
+    }
+  }
+  // 填充方式：cover = 裁切填满（默认）；contain = 完整缩放，小尺寸下图片整体缩小、不留裁切
+  if (thumbImg) thumbImg.style.objectFit = block.fit === "contain" ? "contain" : "cover";
 
   // 点击打开 Lightbox
   card.addEventListener("click", () => {
@@ -193,192 +385,63 @@ function renderImageCard(section, index) {
   return card;
 }
 
-// 获取卡片高亮角标
-function getCardBadge(section, index) {
-  if (section === "product") {
-    if (index === 1) return '<span class="card-badge badge-hot">🔥 耐温 850℃</span>';
-    if (index === 2) return '<span class="card-badge badge-patent">📜 发明专利 CN121382800A</span>';
-    if (index === 3) return '<span class="card-badge badge-deal">⚛️ 核能重大工程</span>';
-    if (index === 4) return '<span class="card-badge badge-safe">⚙️ 智能化测控</span>';
-  }
-  if (section === "performance") {
-    if (index === 1) return '<span class="card-badge badge-advantage">⚡ 无磁钢内转子</span>';
-    if (index === 2) return '<span class="card-badge badge-safe">💨 CFD 自循环风冷</span>';
-    if (index === 3) return '<span class="card-badge badge-pain">⚠️ 传统长轴痛点解决</span>';
-  }
-  if (section === "usage") {
-    if (index === 1) return '<span class="card-badge badge-advantage">📐 轴长仅 1.5m 紧凑安装</span>';
-    if (index === 2) return '<span class="card-badge badge-safe">💧 免外部冷却水</span>';
-    if (index === 3) return '<span class="card-badge badge-deal">🛡️ 理论无限寿命</span>';
-  }
-  if (section === "application") {
-    if (index === 1) return '<span class="card-badge badge-hot">☀️ 光热储能 565℃</span>';
-    if (index === 2) return '<span class="card-badge badge-deal">⚛️ 先进核能 (已供12台)</span>';
-    if (index === 3) return '<span class="card-badge badge-safe">🧪 精细化工强腐蚀</span>';
-    if (index === 4) return '<span class="card-badge badge-advantage">🏭 冶金熔渣 (已供7台)</span>';
-  }
-  return "";
-}
+// ===== 渲染内容块表格（表头 / 行列全部由后台增删编辑，样式复用对标表）=====
+function renderBlockTable(block, anchorId) {
+  // 没有任何列时不渲染：前台不兜任何模板表格，表格结构完全由后台内容块决定
+  if (!block.head || !block.head.length) return null;
 
-// ===== 渲染国内外主流竞品参数对标表格 =====
-function renderCompareTable() {
   const wrap = document.createElement("div");
-  wrap.className = "compare-table-container";
+  wrap.className = "compare-table-container block-table-container";
+  if (anchorId) wrap.id = anchorId;
+
+  const cols = block.head;
+  const hlRaw = parseInt(block.hl, 10);
+  const hl = isNaN(hlRaw) ? 1 : hlRaw; // -1 = 不高亮（不匹配任何列索引）
+  const cellCls = c => (c === hl ? ' class="highlight-col"' : "");
+
+  const headHtml = cols.map((h, c) => `<th${cellCls(c)}>${escapeHtml(h)}</th>`).join("");
+  const bodyHtml = (block.rows || []).map(row =>
+    "<tr>" + cols.map((_, c) => {
+      const val = row[c] || "";
+      return c === 0 ? `<td><strong>${escapeHtml(val)}</strong></td>`
+        : `<td${cellCls(c)}>${c === hl ? "<strong>" + escapeHtml(val) + "</strong>" : escapeHtml(val)}</td>`;
+    }).join("") + "</tr>"
+  ).join("");
+
   wrap.innerHTML = `
-    <div class="compare-table-header">
-      <h3>📊 国内外主流竞品与传统长轴泵参数综合对标</h3>
-      <p>迈德瑞高温磁力泵在耐温极限、密封可靠性、结构紧凑度与工程经济性上实现全方位突破</p>
-    </div>
+    ${block.title ? `<div class="compare-table-header"><h3>${escapeHtml(block.title)}</h3>${block.subtitle ? `<p>${escapeHtml(block.subtitle)}</p>` : ""}</div>` : ""}
     <div class="table-responsive">
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th>对比维度</th>
-            <th class="highlight-col">本项目高温磁力泵 (迈德瑞)</th>
-            <th>传统熔盐长轴液下泵</th>
-            <th>国际进口巨头 (Flowserve / Sulzer / KSB)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>最高耐温性能</strong></td>
-            <td class="highlight-col"><strong>最高可达 850℃</strong> <span class="table-tag">行业突破</span></td>
-            <td>≤ 565℃ (高温极易热变形)</td>
-            <td>≤ 550℃ (常规磁力泵极限)</td>
-          </tr>
-          <tr>
-            <td><strong>设备密封形式</strong></td>
-            <td class="highlight-col"><strong>全静密封 (零泄漏 本质安全)</strong></td>
-            <td>机械动密封 / 填料密封 (泄漏起火风险)</td>
-            <td>动密封 + 复杂辅助密封水冷系统</td>
-          </tr>
-          <tr>
-            <td><strong>结构轴长与轴承</strong></td>
-            <td class="highlight-col"><strong>轴长仅 1.5 米 (仅 2 个复合轴承)</strong></td>
-            <td>轴长达 20 米 (多达 9 个导轴承，振动大)</td>
-            <td>结构庞大、占地空间大</td>
-          </tr>
-          <tr>
-            <td><strong>轴承材质与耐磨寿命</strong></td>
-            <td class="highlight-col"><strong>金属-陶瓷复合轴承 (寿命提升10倍+)</strong></td>
-            <td>钴基/镍基合金 (钴溶出、碳化钨剥落烧瓦)</td>
-            <td>进口耐磨陶瓷 / 硬质合金 (价格高昂)</td>
-          </tr>
-          <tr>
-            <td><strong>高温合金用量</strong></td>
-            <td class="highlight-col"><strong>较传统长轴泵减少 80%</strong></td>
-            <td>基准 (需消耗大量昂贵高温合金)</td>
-            <td>基准</td>
-          </tr>
-          <tr>
-            <td><strong>冷却散热形式</strong></td>
-            <td class="highlight-col"><strong>CFD 自循环风冷 (免外部冷却水管)</strong></td>
-            <td>复杂外部冷却水系统 (耗水耗电)</td>
-            <td>外部水冷或外置循环装置</td>
-          </tr>
-          <tr>
-            <td><strong>单台造价与交期</strong></td>
-            <td class="highlight-col"><strong>300 ~ 500 万元 · 快速交付</strong></td>
-            <td>560 ~ 1000+ 万元</td>
-            <td>800 ~ 1000+ 万元 (关税高、交期6~12月)</td>
-          </tr>
-          <tr>
-            <td><strong>年均维护与故障率</strong></td>
-            <td class="highlight-col"><strong>免日常维护 · 理论无限寿命</strong></td>
-            <td>故障率高达 1.5 ~ 3 次/年 (需吊装大修)</td>
-            <td>定期更换易损密封套件</td>
-          </tr>
-        </tbody>
+      <table class="compare-table block-table">
+        <thead><tr>${headHtml}</tr></thead>
+        <tbody>${bodyHtml}</tbody>
       </table>
     </div>
   `;
   return wrap;
 }
 
-// ===== 渲染权威客户供货与产学研体系展示 =====
-function renderClientAndTeamShowcase() {
-  const wrap = document.createElement("div");
-  wrap.className = "client-team-showcase";
-  wrap.innerHTML = `
-    <!-- 客户实绩徽章墙 -->
-    <div class="showcase-block">
-      <div class="showcase-title">
-        <h3>🎯 行业龙头客户与国家重大工程供货实绩</h3>
-        <p>核心装备已在国家重点科研院所及行业领军企业通过极端工况考核与批量验证</p>
-      </div>
-      <div class="client-grid-cards">
-        <div class="client-stat-card">
-          <div class="client-logo-wrap">
-            <img src="images/client_ciae.png" alt="中国原子能科学研究院" onerror="this.src='images/logo.png'">
-          </div>
-          <div class="client-stat-info">
-            <h4>中国原子能科学研究院</h4>
-            <div class="client-badge">已供货 12 台</div>
-            <p>CiADS 加速器次临界堆铅基实验堆 (约2000万项目) 及堆芯水力验证装置</p>
-          </div>
-        </div>
-        <div class="client-stat-card">
-          <div class="client-logo-wrap">
-            <img src="images/client_cas.png" alt="中科院合肥物质科学研究院" onerror="this.src='images/logo.png'">
-          </div>
-          <div class="client-stat-info">
-            <h4>中科院合肥物质科学研究院</h4>
-            <div class="client-badge">已供货 2 台</div>
-            <p>液态金属特种输送回路与聚变堆关键技术验证平台稳定运行</p>
-          </div>
-        </div>
-        <div class="client-stat-card">
-          <div class="client-logo-wrap">
-            <img src="images/client_cgn.png" alt="中广核研究院" onerror="this.src='images/logo.png'">
-          </div>
-          <div class="client-stat-info">
-            <h4>中广核研究院 / 中广核新能源</h4>
-            <div class="client-badge">已供货 2 台</div>
-            <p>580℃ 新型高温熔盐试验台核心回路循环泵 (约1400万合作意向)</p>
-          </div>
-        </div>
-        <div class="client-stat-card">
-          <div class="client-logo-wrap">
-            <img src="images/client_haomai.png" alt="山东豪迈集团" onerror="this.src='images/logo.png'">
-          </div>
-          <div class="client-stat-info">
-            <h4>山东豪迈集团</h4>
-            <div class="client-badge">已供货 7 台</div>
-            <p>高端能源装备特种工况批量稳定运行与产业化配套</p>
-          </div>
-        </div>
-      </div>
-    </div>
+// 获取卡片角标样式类（按板块与序号循环配色，保持原有视觉风格）
+function getCardBadgeClass(section, index) {
+  const classMap = {
+    product: ["badge-hot", "badge-patent", "badge-deal", "badge-safe"],
+    performance: ["badge-advantage", "badge-safe", "badge-pain"],
+    usage: ["badge-advantage", "badge-safe", "badge-deal"],
+    application: ["badge-hot", "badge-deal", "badge-safe", "badge-advantage"]
+  };
+  const list = classMap[section] || ["badge-advantage"];
+  return list[(index - 1) % list.length];
+}
 
-    <!-- 产学研与制造保障体系 -->
-    <div class="showcase-block" style="margin-top:36px;">
-      <div class="showcase-title">
-        <h3>🏛️ 顶尖产学研协同与产业化制造基地保障</h3>
-        <p>依托高校全国重点实验室科研转化 + 3.5 亿高端泵业供应链协同 + 淮安经开区基地</p>
-      </div>
-      <div class="pillars-grid">
-        <div class="pillar-card">
-          <div class="pillar-icon">🏭</div>
-          <h4>产业化核心基地</h4>
-          <h5>江苏省淮安经济技术开发区</h5>
-          <p>依托本地完备的高端装备产业链配套与人才扶持政策，打造华东标杆并辐射全国。</p>
-        </div>
-        <div class="pillar-card">
-          <div class="pillar-icon">🎓</div>
-          <h4>联合东北大学全国重点实验室</h4>
-          <h5>深部金属矿智能开采与装备实验室</h5>
-          <p>由马树军教授博导团队深度协同，保持持续前沿研发与颠覆性成果转化能力。</p>
-        </div>
-        <div class="pillar-card">
-          <div class="pillar-icon">⚙️</div>
-          <h4>协同大连海特泵业供应链</h4>
-          <h5>瑞士 Sulzer 制造标准 · 年产值 3.5 亿元</h5>
-          <p>30年高端泵业制造积淀与完备零部件供应链，为规模化量产提供坚实保障。</p>
-        </div>
-      </div>
-    </div>
-  `;
-  return wrap;
+// ===== 解析表单下拉选项（每行一个，* 开头为默认选中） =====
+function parseFormOptions(text) {
+  return String(text || "")
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => {
+      if (s.startsWith("*")) return { text: s.slice(1).trim(), selected: true };
+      return { text: s, selected: false };
+    });
 }
 
 // ===== 渲染「联系我们 / 在线工况选型」板块 =====
@@ -394,25 +457,49 @@ function renderContactSection() {
   const email = DataManager.getValue("contact", "email") || "sales@magdrive-tech.com";
   const address = DataManager.getValue("contact", "address") || "江苏省淮安经济技术开发区南马厂街道内湖路82号经管站103室";
   const hours = DataManager.getValue("contact", "hours") || "周一至周五 08:30 - 18:00";
-  const creditCode = DataManager.getValue("contact", "credit_code") || "91320891MAKML1457M";
+  // 企业资质两项（信用代码条目 / 营业执照卡片）均为「数据驱动、留空自动隐藏」：
+  // 清空信用代码 → 该条目不出现在联系卡片；未上传执照图片 → 执照卡片不出现。
+  // 想恢复只要在后台把值填回去即可，不写死在前台代码里。
+  const creditCode = DataManager.getValue("contact", "credit_code") || "";
   const legalPerson = DataManager.getValue("contact", "legal_person") || "张剑";
   const registeredCapital = DataManager.getValue("contact", "registered_capital") || "450万元整";
   const formTitle = DataManager.getValue("contact", "form_title") || "在线技术咨询与工况参数选型定制";
   const formSubtitle = DataManager.getValue("contact", "form_subtitle") || "请提交您的介质类型 (熔盐/液态金属/强酸碱)、运行温区、流量扬程或技术要求，工程师团队2小时内对接";
-  const licenseImg = DataManager.getMetaImage("license") || "images/business_license.jpg";
+  const licenseImg = DataManager.getMetaImage("license") || "";
 
-  // 将营业执照加入画廊
-  const licenseGalleryIndex = galleryItems.length;
-  galleryItems.push({
-    url: licenseImg,
-    caption: `${company} - 营业执照官方资质认证`,
-    description: `统一社会信用代码: ${creditCode} | 法定代表人: ${legalPerson} | 注册资本: ${registeredCapital} | 发证机关: 淮安经济技术开发区行政审批局`,
-    section: "contact"
-  });
+  // 营业执照卡片说明（支持占位符替换）
+  const licenseSub = T("license_sub_template")
+    .replace(/\{legal_person\}/g, legalPerson)
+    .replace(/\{registered_capital\}/g, registeredCapital);
+
+  // 将营业执照加入画廊（标题与说明同样支持占位符）；未上传执照图片时不加入画廊
+  const licenseGalleryIndex = licenseImg ? galleryItems.length : -1;
+  if (licenseImg) {
+    galleryItems.push({
+      url: licenseImg,
+      caption: T("license_caption_template").replace(/\{company\}/g, company),
+      description: T("license_desc_template")
+        .replace(/\{credit_code\}/g, creditCode)
+        .replace(/\{legal_person\}/g, legalPerson)
+        .replace(/\{registered_capital\}/g, registeredCapital),
+      section: "contact"
+    });
+  }
+
+  // 联系方式条目（邮箱附加与时间附加说明可留空）
+  const emailExtra = T("contact_email_extra");
+  const hoursNote = T("contact_hours_note");
+
+  // 表单下拉选项
+  const productOptions = parseFormOptions(T("form_product_options"));
+  const tempOptions = parseFormOptions(T("form_temp_options"));
+
+  // 板块背景图
+  applySectionBackground(sec, "contact");
 
   sec.innerHTML = `
     <div class="section-header">
-      <div class="section-tag">GET IN TOUCH & ENGINEERING SUPPORT</div>
+      <div class="section-tag">${escapeHtml(T("contact_tag"))}</div>
       <h2>${escapeHtml(title)}</h2>
       <p>${escapeHtml(desc)}</p>
     </div>
@@ -427,49 +514,51 @@ function renderContactSection() {
           <div class="contact-info-item">
             <div class="contact-icon">📞</div>
             <div class="contact-details">
-              <h4>技术咨询 / 销售热线</h4>
+              <h4>${escapeHtml(T("contact_phone_label"))}</h4>
               <p>${escapeHtml(phone)}</p>
             </div>
           </div>
           <div class="contact-info-item">
             <div class="contact-icon">✉️</div>
             <div class="contact-details">
-              <h4>技术选型与商务邮箱</h4>
-              <p>${escapeHtml(email)} · djw@neu.edu.cn</p>
+              <h4>${escapeHtml(T("contact_email_label"))}</h4>
+              <p>${escapeHtml(email)}${emailExtra ? ' · ' + escapeHtml(emailExtra) : ''}</p>
             </div>
           </div>
           <div class="contact-info-item">
             <div class="contact-icon">📍</div>
             <div class="contact-details">
-              <h4>产业化核心基地</h4>
+              <h4>${escapeHtml(T("contact_address_label"))}</h4>
               <p>${escapeHtml(address)}</p>
             </div>
           </div>
           <div class="contact-info-item">
             <div class="contact-icon">🕒</div>
             <div class="contact-details">
-              <h4>技术支持响应时间</h4>
-              <p>${escapeHtml(hours)} (紧急工况2小时极速响应)</p>
+              <h4>${escapeHtml(T("contact_hours_label"))}</h4>
+              <p>${escapeHtml(hours)}${hoursNote ? ' ' + escapeHtml(hoursNote) : ''}</p>
             </div>
           </div>
+          ${creditCode ? `
           <div class="contact-info-item">
             <div class="contact-icon">📜</div>
             <div class="contact-details">
-              <h4>统一社会信用代码</h4>
+              <h4>${escapeHtml(T("contact_credit_label"))}</h4>
               <p style="font-family:monospace;font-size:14px;letter-spacing:0.8px;font-weight:600;">${escapeHtml(creditCode)}</p>
             </div>
-          </div>
+          </div>` : ''}
         </div>
 
-        <!-- 营业执照官方资质认证小卡片 -->
+        <!-- 营业执照官方资质认证小卡片（未上传执照图片时整块不渲染）-->
+        ${licenseImg ? `
         <div class="license-preview-box" id="licensePreviewBox" title="点击全屏放大查看营业执照原件">
           <img src="${licenseImg}" alt="营业执照原件" class="license-thumb">
           <div class="license-text-block">
-            <div class="license-title">国家市场监督管理总局监制 · 正规营业执照</div>
-            <div class="license-sub">法定代表人: ${escapeHtml(legalPerson)} · 注册资本: ${escapeHtml(registeredCapital)} (点击查看原件)</div>
+            <div class="license-title">${escapeHtml(T("license_title"))}</div>
+            <div class="license-sub">${escapeHtml(licenseSub)}</div>
           </div>
           <span class="license-zoom-icon">🔍</span>
-        </div>
+        </div>` : ''}
       </div>
 
       <!-- 右侧：专业工况参数选型定制表单 -->
@@ -479,53 +568,44 @@ function renderContactSection() {
         <form class="inquiry-form" id="inquiryForm">
           <div class="form-row">
             <div class="form-col">
-              <label>您的姓名 / 称呼<span class="req">*</span></label>
-              <input type="text" id="inq_name" placeholder="例如：张总 / 李总工" required>
+              <label>${escapeHtml(T("form_label_name"))}<span class="req">*</span></label>
+              <input type="text" id="inq_name" placeholder="${escapeAttr(T("form_ph_name"))}" required>
             </div>
             <div class="form-col">
-              <label>联系电话 / 微信<span class="req">*</span></label>
-              <input type="tel" id="inq_contact" placeholder="例如：13800000000" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-col">
-              <label>电子邮箱</label>
-              <input type="email" id="inq_email" placeholder="例如：engineer@company.com">
-            </div>
-            <div class="form-col">
-              <label>单位 / 企业名称</label>
-              <input type="text" id="inq_company" placeholder="例如：某某能源装备 / 化工研究院">
+              <label>${escapeHtml(T("form_label_contact"))}<span class="req">*</span></label>
+              <input type="tel" id="inq_contact" placeholder="${escapeAttr(T("form_ph_contact"))}" required>
             </div>
           </div>
           <div class="form-row">
             <div class="form-col">
-              <label>输送介质类型</label>
+              <label>${escapeHtml(T("form_label_email"))}</label>
+              <input type="email" id="inq_email" placeholder="${escapeAttr(T("form_ph_email"))}">
+            </div>
+            <div class="form-col">
+              <label>${escapeHtml(T("form_label_company"))}</label>
+              <input type="text" id="inq_company" placeholder="${escapeAttr(T("form_ph_company"))}">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col">
+              <label>${escapeHtml(T("form_label_product"))}</label>
               <select id="inq_product">
-                <option value="高温二元熔盐 (565℃)">高温二元熔盐 (565℃ 光热/储能)</option>
-                <option value="液态铅铋合金 (LBE 480~550℃)">液态铅铋合金 (LBE 480~550℃ 先进核能)</option>
-                <option value="液态锂铅合金 (聚变堆回路)">液态锂铅合金 (聚变堆包层回路)</option>
-                <option value="高温强酸强碱 / 腐蚀性介质">高温强酸强碱 / 腐蚀性介质 (化工)</option>
-                <option value="高温熔融金属 / 熔渣">高温熔融金属 / 熔渣 (冶金)</option>
-                <option value="耐高温金属-陶瓷复合轴承配套">耐高温金属-陶瓷复合轴承配套 (专利)</option>
-                <option value="其他极端工况定制">其他极端工况定制</option>
+                ${productOptions.map(o => '<option value="' + escapeAttr(o.text) + '">' + escapeHtml(o.text) + '</option>').join('\n                ')}
               </select>
             </div>
             <div class="form-col">
-              <label>运行温度区间</label>
+              <label>${escapeHtml(T("form_label_temp"))}</label>
               <select id="inq_temp">
-                <option value="350℃ ~ 500℃ (中高温工况)">350℃ ~ 500℃ (中高温工况)</option>
-                <option value="500℃ ~ 650℃ (典型熔盐/铅铋工况)" selected>500℃ ~ 650℃ (典型熔盐/铅铋工况)</option>
-                <option value="650℃ ~ 850℃ (极限超高温工况)">650℃ ~ 850℃ (极限超高温工况)</option>
-                <option value="350℃ 以下 (常规特种流体)">350℃ 以下 (常规特种流体)</option>
+                ${tempOptions.map(o => '<option value="' + escapeAttr(o.text) + '"' + (o.selected ? ' selected' : '') + '>' + escapeHtml(o.text) + '</option>').join('\n                ')}
               </select>
             </div>
           </div>
           <div class="form-row full-width">
-            <label>工况参数与技术要求 (流量 m³/h、扬程 m、耐压、介质密度等)</label>
-            <textarea id="inq_message" rows="3" placeholder="请简要描述您的工程需求，例如：需要565℃二元熔盐主循环泵，流量150m³/h，扬程60m，要求全静密封零泄漏..."></textarea>
+            <label>${escapeHtml(T("form_label_message"))}</label>
+            <textarea id="inq_message" rows="3" placeholder="${escapeAttr(T("form_ph_message"))}"></textarea>
           </div>
           <button type="submit" class="btn-submit-inquiry" id="btnSubmitInquiry">
-            <span>🚀 提交工况选型需求，获取技术方案与报价</span>
+            <span>${escapeHtml(T("form_submit_text"))}</span>
           </button>
           <div id="inquiryMsg" class="inquiry-msg"></div>
         </form>
@@ -539,7 +619,7 @@ function renderContactSection() {
     if (form) form.addEventListener("submit", handleInquirySubmit);
 
     const licenseBox = document.getElementById("licensePreviewBox");
-    if (licenseBox) {
+    if (licenseBox && licenseGalleryIndex >= 0) {
       licenseBox.addEventListener("click", () => {
         openLightbox(licenseGalleryIndex);
       });
@@ -568,19 +648,19 @@ async function handleInquirySubmit(e) {
   }
 
   btn.disabled = true;
-  btn.innerHTML = "<span>⏳ 正在提交需求...</span>";
+  btn.innerHTML = "<span>" + escapeHtml(T("form_submitting_text")) + "</span>";
 
   try {
     const res = await DataManager.submitInquiry({
       name, contact, email, company, product, message
     });
-    showInquiryMsg("🎉 " + (res.message || "需求已成功提交！我们的技术专家将在2小时内与您联系对接技术方案。"), false);
+    showInquiryMsg((res && res.message) ? res.message : T("form_success_msg"), false);
     document.getElementById("inquiryForm").reset();
   } catch (err) {
-    showInquiryMsg("提交失败，请重试或直接致电 400-888-9999: " + err.message, true);
+    showInquiryMsg(T("form_error_msg").replace(/\{phone\}/g, phone || "400-888-9999") + err.message, true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = "<span>🚀 提交工况选型需求，获取技术方案与报价</span>";
+    btn.innerHTML = "<span>" + escapeHtml(T("form_submit_text")) + "</span>";
   }
 }
 

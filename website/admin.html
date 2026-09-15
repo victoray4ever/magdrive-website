@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理后台 - 迈德瑞智能装备科技</title>
   <link rel="icon" type="image/png" href="images/logo.png">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/cropper.min.css">
+  <link rel="stylesheet" href="css/style.css?v=20260914n">
+  <link rel="stylesheet" href="css/cropper.min.css?v=20260914n">
 </head>
 <body>
   <!-- 登录面板 -->
@@ -51,35 +51,8 @@
     </div>
   </div>
 
-  <!-- 修改密码弹窗 -->
-  <div class="crop-overlay" id="passwordModal" style="display:none;">
-    <div class="crop-modal" style="max-width:440px;">
-      <h3 style="margin-bottom:8px;color:#0f172a;">🔑 修改管理员密码</h3>
-      <div class="crop-hint" style="margin-bottom:16px;">建议使用包含字母和数字的安全密码（不少于6位）</div>
-      <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
-        <div class="form-group" style="margin-bottom:14px;text-align:left;">
-          <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#334155;">当前原密码<span style="color:#ef4444;">*</span></label>
-          <input type="password" id="oldPassword" placeholder="请输入当前使用的原密码" required style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;box-sizing:border-box;">
-        </div>
-        <div class="form-group" style="margin-bottom:14px;text-align:left;">
-          <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#334155;">设置新密码<span style="color:#ef4444;">*</span></label>
-          <input type="password" id="newPassword" placeholder="请输入新密码（至少6位）" required minlength="6" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;box-sizing:border-box;">
-        </div>
-        <div class="form-group" style="margin-bottom:16px;text-align:left;">
-          <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#334155;">确认新密码<span style="color:#ef4444;">*</span></label>
-          <input type="password" id="confirmPassword" placeholder="请再次输入新密码" required minlength="6" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;box-sizing:border-box;">
-        </div>
-        <div id="pwdErrorMsg" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:8px 12px;border-radius:6px;font-size:13px;margin-bottom:14px;text-align:left;"></div>
-        <div class="crop-toolbar" style="display:flex;justify-content:flex-end;gap:10px;">
-          <button type="button" class="crop-btn-cancel" onclick="closePasswordModal()">取消</button>
-          <button type="submit" class="crop-btn-confirm" id="btnSubmitPwd" style="background:#0284c7;">确认修改</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="js/cropper.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/cropper.min.js?v=20260914n"></script>
+  <script src="js/data.js?v=20260914n"></script>
+  <script src="js/admin.js?v=20260914n"></script>
 </body>
 </html>

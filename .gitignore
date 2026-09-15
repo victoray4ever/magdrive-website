@@ -30,3 +30,6 @@ website/images/ppt_media/
 .idea/
 *.rar
 website/data/admin.json
+
+# 客户询盘数据（含姓名/手机/邮箱等隐私，仓库为公开仓库，禁止提交）
+website/data/inquiries.json

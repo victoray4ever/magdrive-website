@@ -7,7 +7,6 @@
 
 import http.server
 import socketserver
-import socket
 import webbrowser
 import sys
 import os
@@ -23,22 +22,6 @@ DATA_DIR = os.path.join(DIRECTORY, "data")
 IMAGES_DIR = os.path.join(DIRECTORY, "images")
 INQUIRIES_FILE = os.path.join(DATA_DIR, "inquiries.json")
 CONTENT_FILE = os.path.join(DATA_DIR, "content.csv")
-ADMIN_FILE = os.path.join(DATA_DIR, "admin.json")
-
-def get_admin_credentials():
-    """获取管理员账号密码，若不存在则初始化默认账号"""
-    if os.path.exists(ADMIN_FILE):
-        try:
-            with open(ADMIN_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {"username": "admin", "password": "123"}
-
-def save_admin_credentials(creds):
-    """保存管理员账号密码到磁盘"""
-    with open(ADMIN_FILE, "w", encoding="utf-8") as f:
-        json.dump(creds, f, ensure_ascii=False, indent=2)
 
 # 确保目录存在
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -61,11 +44,6 @@ MIME_TYPES = {
     ".woff2": "font/woff2",
 }
 
-
-
-class ThreadingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
-    daemon_threads = True
-    allow_reuse_address = True
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     """自定义请求处理器，支持 REST API 与 MIME 类型映射"""
@@ -137,39 +115,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path_only = self.path.split("?")[0]
-
-        # API 路由: 管理员登录认证
-        if path_only == "/api/login":
-            data = self.read_json_body()
-            username = data.get("username", "").strip()
-            password = data.get("password", "").strip()
-            creds = get_admin_credentials()
-            if username == creds.get("username") and password == creds.get("password"):
-                token = f"token_{uuid.uuid4().hex}"
-                print(f"[API Auth] 用户 {username} 登录成功")
-                self.send_json(200, {"success": True, "token": token, "message": "登录成功"})
-            else:
-                print(f"[API Auth] 用户 {username} 登录失败: 密码错误")
-                self.send_json(401, {"success": False, "message": "用户名或密码错误，请重试"})
-            return
-
-        # API 路由: 修改管理员密码
-        if path_only == "/api/change-password":
-            data = self.read_json_body()
-            old_password = data.get("old_password", "").strip()
-            new_password = data.get("new_password", "").strip()
-            creds = get_admin_credentials()
-            if old_password != creds.get("password"):
-                self.send_json(400, {"success": False, "message": "当前原密码不正确，请重新输入"})
-                return
-            if not new_password or len(new_password) < 6:
-                self.send_json(400, {"success": False, "message": "新密码长度不能少于6位"})
-                return
-            creds["password"] = new_password
-            save_admin_credentials(creds)
-            print(f"[API Auth] 管理员密码已成功修改")
-            self.send_json(200, {"success": True, "message": "密码修改成功！请使用新密码重新登录"})
-            return
 
         # API 路由: 保存 content.csv
         if path_only == "/api/save-content":
@@ -301,7 +246,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    socket.setdefaulttimeout(20)  # 20秒超时保护，杜绝慢速爬虫挂起
     port = PORT
 
     # 从命令行参数获取端口
@@ -313,40 +257,38 @@ def main():
             print(f"用法: python {sys.argv[0]} [端口号]")
             sys.exit(1)
 
-    # 严格绑定指定端口（带重试机制，绝不漂移端口）
-    httpd = None
-    for attempt in range(10):
+    # 尝试启动服务器，如果端口被占用则自动递增
+    # 使用 ThreadingHTTPServer（多线程 + 端口复用）：
+    # 避免浏览器并行请求 / keep-alive 长连接把单线程服务器阻塞，导致服务假死
+    for attempt_port in range(port, port + 10):
         try:
-            httpd = ThreadingServer(("", port), CustomHandler)
-            break
-        except OSError as e:
-            if attempt < 9:
-                print(f"端口 {port} 暂时繁忙 (处于 TIME_WAIT)，等待 1 秒后重试... ({attempt + 1}/10)")
-                time.sleep(1)
-            else:
-                print(f"错误: 无法绑定端口 {port}: {e}")
-                sys.exit(1)
+            with http.server.ThreadingHTTPServer(("", attempt_port), CustomHandler) as httpd:
+                httpd.daemon_threads = True
+                url = f"http://localhost:{attempt_port}"
+                print("=" * 55)
+                print(f"  🌟 精密轴承产品展示与管理系统已启动")
+                print(f"  👉 网站前台: {url}")
+                print(f"  👉 管理后台: {url}/admin.html")
+                print(f"  👉 本地持久化 API: 已就绪 (直接写入 content.csv & images/)")
+                print(f"  按 Ctrl+C 停止服务器")
+                print("=" * 55)
 
-    url = f"http://localhost:{port}"
-    print("=" * 55)
-    print(f"  🌟 迈德瑞智能装备官网高并发生产服务器已启动")
-    print(f"  👉 监听端口: {port} (多线程并发 + 防爬虫慢连接超时保护)")
-    print(f"  👉 网站前台: {url}")
-    print(f"  👉 管理后台: {url}/admin.html")
-    print(f"  👉 本地持久化 API: 已就绪 (直接写入 content.csv & images/)")
-    print(f"  按 Ctrl+C 停止服务器")
-    print("=" * 55)
+                # 自动打开浏览器（静默容错）
+                try:
+                    webbrowser.open(url)
+                except Exception:
+                    pass
 
-    if sys.stdout.isatty():
-        try:
-            webbrowser.open(url)
-        except Exception:
-            pass
-
-    try:
-        httpd.serve_forever()
-    finally:
-        httpd.server_close()
+                # 开始服务
+                httpd.serve_forever()
+                break
+        except OSError:
+            print(f"端口 {attempt_port} 被占用，尝试下一个端口...")
+            continue
+    else:
+        print(f"错误: 端口 {port}-{port + 9} 均被占用，请手动指定其他端口")
+        print(f"用法: python {sys.argv[0]} [端口号]")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
