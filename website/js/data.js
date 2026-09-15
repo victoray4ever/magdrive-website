@@ -921,13 +921,63 @@ const DataManager = {
   },
 
   // ===== 管理员认证 =====
-  login(username, password) {
-    if (username === this.ADMIN_USER && password === this.ADMIN_PASS) {
+  async login(username, password) {
+    // 优先尝试后端服务端认证
+    if (this._hasBackend) {
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const token = data.token || ("token_" + Date.now() + "_" + Math.random().toString(36).substr(2));
+          sessionStorage.setItem(this.KEYS.session, token);
+          return { success: true, token: token, message: data.message || "登录成功" };
+        } else {
+          return { success: false, message: data.message || "用户名或密码错误，请重试" };
+        }
+      } catch (e) {
+        console.warn("[DataManager] 后端认证请求失败，降级本地校验:", e);
+      }
+    }
+
+    // 本地离线 fallback 校验
+    const localPass = localStorage.getItem("magdrive_admin_pwd") || this.ADMIN_PASS;
+    if (username === this.ADMIN_USER && password === localPass) {
       const token = "token_" + Date.now() + "_" + Math.random().toString(36).substr(2);
       sessionStorage.setItem(this.KEYS.session, token);
-      return true;
+      return { success: true, token: token, message: "登录成功" };
     }
-    return false;
+    return { success: false, message: "用户名或密码错误，请重试" };
+  },
+
+  async changePassword(oldPassword, newPassword) {
+    // 优先向后端服务提交修改密码
+    if (this._hasBackend) {
+      const res = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ old_password: oldPassword, new_password: newPassword })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.message || "修改密码失败");
+      }
+      return data;
+    }
+
+    // 本地离线 fallback 保存
+    const current = localStorage.getItem("magdrive_admin_pwd") || this.ADMIN_PASS;
+    if (oldPassword !== current) {
+      throw new Error("当前原密码不正确，请重新输入");
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error("新密码长度不能少于6位");
+    }
+    localStorage.setItem("magdrive_admin_pwd", newPassword);
+    return { success: true, message: "密码修改成功！请使用新密码重新登录" };
   },
 
   isLoggedIn() {
@@ -981,11 +1031,12 @@ DataManager.ADMIN_TAB_DEFAULTS = {
   usage: "使用方法",
   application: "应用工况",
   contact: "联系信息设置",
-  inquiries: "客户询盘管理 📩"
+  inquiries: "客户询盘管理 📩",
+  webhook: "GitHub 自动部署 🚀"
 };
 
 // 后台标签栏的 Tab 顺序（admin.js 的标签与内容面板均按此顺序渲染）
-DataManager.ADMIN_TAB_ORDER = ["texts"].concat(DataManager.sections, ["contact", "inquiries"]);
+DataManager.ADMIN_TAB_ORDER = ["texts"].concat(DataManager.sections, ["contact", "inquiries", "webhook"]);
 
 // 读取某个后台标签的名称：优先取后台自定义值，为空则回退内置默认名称
 DataManager.getAdminTabLabel = function (tabId) {

@@ -26,15 +26,21 @@ function showAdminPanel() {
   renderAdminPanel();
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   const errorEl = document.getElementById('loginError');
-  if (DataManager.login(username, password)) {
-    showAdminPanel();
-  } else {
-    errorEl.textContent = '用户名或密码错误，请重试';
+  errorEl.textContent = '';
+  try {
+    const res = await DataManager.login(username, password);
+    if (res && res.success) {
+      showAdminPanel();
+    } else {
+      errorEl.textContent = (res && res.message) ? res.message : '用户名或密码错误，请重试';
+    }
+  } catch (err) {
+    errorEl.textContent = err.message || '登录异常，请重试';
   }
 }
 
