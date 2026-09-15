@@ -29,7 +29,11 @@ website/images/ppt_media/
 .vscode/
 .idea/
 *.rar
+# 敏感运行时数据与凭证（公开仓库禁止提交）
 website/data/admin.json
-
-# 客户询盘数据（含姓名/手机/邮箱等隐私，仓库为公开仓库，禁止提交）
+website/data/webhook_secret.txt
 website/data/inquiries.json
+data/admin.json
+data/webhook_secret.txt
+data/inquiries.json
+

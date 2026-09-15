@@ -243,6 +243,19 @@ product,image1_description,详细性能与技术优势介绍
    - **Forward Port**：填 `8090`（与 `magdrive.service` 中配置一致）。
    - 在 **SSL** 标签页中申请 Let's Encrypt 证书并开启 **Force SSL**。
 
+### 方式二：GitHub Webhook 全自动持续部署（CI/CD）
+
+当您或协作成员将代码推送到 GitHub 仓库时，服务器将自动触发拉取并即时热更新前台：
+
+1. **进入 GitHub 仓库后台**：
+   依次点击 **Settings** -> **Webhooks** -> **Add webhook**。
+2. **配置 Webhook 参数**：
+   - **Payload URL**：`http://服务器IP:8090/api/webhook`（或您的自定义反代域名 `https://your-domain.com/api/webhook`）
+   - **Content type**：选择 `application/json`
+   - **Secret**：填写服务器端保存在 `data/webhook_secret.txt` 中的密钥（安全隔离，未提交至 Git）
+   - **Which events would you like to trigger this webhook?**：选择 `Just the push event`
+3. **完成配置**：点击 **Add webhook**，GitHub 将发送一次测试 ping，收到绿色对勾即表示连通！后续每次推送代码均会自动同步并在 `/admin.html` 的「GitHub 自动部署 🚀」面板中查看实时日志。
+
 ---
 
 ## 📄 开源协议

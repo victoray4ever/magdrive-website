@@ -64,6 +64,7 @@ function renderAdminPanel() {
       <div class="actions">
         ${serverBadge}
         <a href="index.html" class="btn-view-site" target="_blank">查看前台</a>
+        <button onclick="openPasswordModal()" class="btn-change-pwd" title="修改后台管理员登录密码" style="padding:7px 14px;background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">🔑 修改密码</button>
         <button onclick="handleResetDefaults()" class="btn-reset-defaults" title="重置回初始设置">恢复默认</button>
         <button onclick="handleLogout()" class="btn-logout">退出登录</button>
       </div>
@@ -118,6 +119,7 @@ function renderAdminPanel() {
       <!-- Tab 导航（标签文字可在「首页与通用文案」Tab 内自定义） -->
       <div class="admin-tabs" id="adminTabs">${renderAdminTabsInner(DataManager.sections[0] || 'texts')}</div>
 
+
       <!-- Tab 内容 -->
       <div id="tabContents">
         <div class="tab-content" id="tab_texts">${renderTextsTab()}</div>
@@ -126,6 +128,7 @@ function renderAdminPanel() {
         ).join('')}
         <div class="tab-content" id="tab_contact">${renderContactEditor()}</div>
         <div class="tab-content" id="tab_inquiries">${renderInquiriesPanel()}</div>
+        <div class="tab-content" id="tab_webhook">${renderWebhookPanel()}</div>
       </div>
 
       <!-- 保存栏 -->
@@ -885,10 +888,12 @@ function exportInquiriesCSV() {
 // ===== 切换 Tab =====
 // ===== 后台标签栏渲染（标签文字支持自定义，见「首页与通用文案」Tab）=====
 function renderAdminTabsInner(currentId) {
-  return DataManager.ADMIN_TAB_ORDER.map(id => {
+  const tabsHtml = DataManager.ADMIN_TAB_ORDER.map(id => {
     const cls = 'admin-tab' + (id === currentId ? ' active' : '');
     return `<button class="${cls}" onclick="switchTab('${id}')">${escapeHtml(DataManager.getAdminTabLabel(id))}</button>`;
   }).join('');
+  const whCls = 'admin-tab' + (currentId === 'webhook' ? ' active' : '');
+  return tabsHtml + `<button class="${whCls}" onclick="switchTab('webhook')">GitHub 自动部署 🚀</button>`;
 }
 
 // 重新渲染顶部标签栏，并保留当前选中的标签
@@ -912,6 +917,9 @@ function switchTab(section) {
 
   if (section === 'inquiries') {
     loadInquiriesList();
+  }
+  if (section === 'webhook') {
+    loadWebhookStatus();
   }
 }
 
@@ -1159,5 +1167,146 @@ function closeCropModal() {
     cropperInstance = null;
   }
   cropCallback = null;
+}
+
+// ===== 修改密码模态弹窗控制 =====
+function openPasswordModal() {
+  const modal = document.getElementById('passwordModal');
+  const errorEl = document.getElementById('pwdErrorMsg');
+  const form = document.getElementById('changePasswordForm');
+  if (modal) {
+    if (form) form.reset();
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.style.display = 'none';
+    }
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      document.getElementById('oldPassword').focus();
+    }, 100);
+  }
+}
+
+function closePasswordModal() {
+  const modal = document.getElementById('passwordModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const oldPwd = document.getElementById('oldPassword').value.trim();
+  const newPwd = document.getElementById('newPassword').value.trim();
+  const confirmPwd = document.getElementById('confirmPassword').value.trim();
+  const errorEl = document.getElementById('pwdErrorMsg');
+  const submitBtn = document.getElementById('btnSubmitPwd');
+
+  if (errorEl) {
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
+  }
+
+  if (newPwd.length < 6) {
+    if (errorEl) {
+      errorEl.textContent = '新密码长度至少需要 6 个字符';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    if (errorEl) {
+      errorEl.textContent = '两次输入的新密码不一致，请核对';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = '正在修改...';
+  }
+
+  try {
+    const res = await DataManager.changePassword(oldPwd, newPwd);
+    closePasswordModal();
+    showToast(res.message || '🎉 密码修改成功！请重新登录');
+    
+    // 延迟 1.5 秒登出并提示重新登录
+    setTimeout(() => {
+      handleLogout();
+      const loginErr = document.getElementById('loginError');
+      if (loginErr) {
+        loginErr.style.color = '#15803d';
+        loginErr.textContent = '密码已修改成功，请使用新密码登录';
+      }
+    }, 1500);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = err.message || '修改失败，请重试';
+      errorEl.style.display = 'block';
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '确认修改';
+    }
+  }
+}
+
+// ===== 渲染 GitHub Webhook 管理面板 =====
+function renderWebhookPanel() {
+  const webhookUrl = `${window.location.protocol}//${window.location.host}/api/webhook`;
+  return `
+    <div style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="color:#0d47a1;margin:0;">🚀 GitHub 自动部署与更新监控</h3>
+        <button onclick="loadWebhookStatus()" style="padding:6px 14px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;">🔄 刷新部署状态</button>
+      </div>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin-bottom:16px;">
+        已在服务器配置 GitHub Webhook 自动化同步功能。当您或团队协作者向 GitHub 仓库推送（Push）代码后，服务器将自动拉取最新静态资源与网页内容，实时刷新生效。
+      </p>
+
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:20px;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:10px;">📋 GitHub Webhook 配置参数</div>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:13px;align-items:center;">
+          <div style="color:#64748b;">Payload URL:</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="whPayloadUrl" value="${escapeAttr(webhookUrl)}" readonly style="flex:1;padding:6px 10px;background:#fff;border:1px solid #cbd5e1;border-radius:4px;font-family:monospace;font-size:12px;">
+            <button onclick="navigator.clipboard.writeText(document.getElementById('whPayloadUrl').value);showToast('已复制 Payload URL');" style="padding:6px 10px;border:1px solid #cbd5e1;background:#fff;border-radius:4px;cursor:pointer;font-size:12px;">复制</button>
+          </div>
+          <div style="color:#64748b;">Content type:</div>
+          <div><code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">application/json</code></div>
+          <div style="color:#64748b;">Secret:</div>
+          <div style="color:#334155;">保存在服务器本地 <code>data/webhook_secret.txt</code> (HMAC-SHA256 签名，未提交公开 git)</div>
+          <div style="color:#64748b;">Trigger 事件:</div>
+          <div><code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">Just the push event</code></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:8px;">📜 最近一次自动部署日志</div>
+        <pre id="webhookLogsBox" style="background:#0f172a;color:#38bdf8;padding:14px;border-radius:8px;font-size:12px;max-height:260px;overflow-y:auto;white-space:pre-wrap;line-height:1.5;">正在加载日志...</pre>
+      </div>
+    </div>
+  `;
+}
+
+async function loadWebhookStatus() {
+  const box = document.getElementById('webhookLogsBox');
+  if (!box) return;
+  box.textContent = '正在获取服务器最新部署日志...';
+  try {
+    const res = await fetch('/api/webhook-status');
+    const data = await res.json();
+    if (data.success && data.recent_logs) {
+      box.textContent = data.recent_logs;
+    } else {
+      box.textContent = '暂无部署日志记录或尚未触发部署。';
+    }
+  } catch (e) {
+    box.textContent = '获取部署日志失败: ' + e.message;
+  }
 }
 

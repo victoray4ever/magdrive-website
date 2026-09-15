@@ -15,6 +15,11 @@ import json
 import base64
 import time
 import uuid
+import hmac
+import hashlib
+import subprocess
+import threading
+import urllib.parse
 
 PORT = 8080
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +27,60 @@ DATA_DIR = os.path.join(DIRECTORY, "data")
 IMAGES_DIR = os.path.join(DIRECTORY, "images")
 INQUIRIES_FILE = os.path.join(DATA_DIR, "inquiries.json")
 CONTENT_FILE = os.path.join(DATA_DIR, "content.csv")
+ADMIN_FILE = os.path.join(DATA_DIR, "admin.json")
+WEBHOOK_SECRET_FILE = os.path.join(DATA_DIR, "webhook_secret.txt")
+DEPLOY_SCRIPT = os.path.join(DIRECTORY, "deploy", "webhook_deploy.sh")
+
+def get_webhook_secret():
+    """获取 Webhook 密钥，优先从环境变量读取，其次读取本地配置文件，若均不存在则自动生成安全密钥保存 (绝不提交公开 git)"""
+    env_secret = os.environ.get("WEBHOOK_SECRET", "").strip()
+    if env_secret:
+        return env_secret
+    if os.path.exists(WEBHOOK_SECRET_FILE):
+        try:
+            with open(WEBHOOK_SECRET_FILE, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if content:
+                    return content
+        except Exception as e:
+            print(f"[Webhook] 读取密钥文件失败: {e}")
+    # 自动生成 40 字符随机安全 token
+    new_secret = uuid.uuid4().hex + uuid.uuid4().hex[:8]
+    try:
+        with open(WEBHOOK_SECRET_FILE, "w", encoding="utf-8") as f:
+            f.write(new_secret)
+        try:
+            os.chmod(WEBHOOK_SECRET_FILE, 0o600)
+        except Exception:
+            pass
+        print(f"[Webhook] 已自动生成新的 Webhook Secret 并保存至本地文件 (未提交公开 git)")
+    except Exception as e:
+        print(f"[Webhook Error] 保存密钥失败: {e}")
+    return new_secret
+
+def verify_github_signature(raw_body, signature_header, secret):
+    """验证 GitHub 发送的 HMAC-SHA256 签名"""
+    if not signature_header or not signature_header.startswith("sha256="):
+        return False
+    expected_hash = signature_header[7:].strip()
+    mac = hmac.new(secret.encode("utf-8"), raw_body, hashlib.sha256)
+    computed_hash = mac.hexdigest()
+    return hmac.compare_digest(expected_hash, computed_hash)
+
+def get_admin_credentials():
+    """获取管理员账号密码，若不存在则初始化默认账号"""
+    if os.path.exists(ADMIN_FILE):
+        try:
+            with open(ADMIN_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"username": "admin", "password": "123"}
+
+def save_admin_credentials(creds):
+    """保存管理员账号密码到磁盘"""
+    with open(ADMIN_FILE, "w", encoding="utf-8") as f:
+        json.dump(creds, f, ensure_ascii=False, indent=2)
 
 # 确保目录存在
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -110,11 +169,139 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(200, {"success": True, "data": inquiries})
             return
 
+        # API 路由: Webhook 状态与最近部署日志检查
+        if path_only == "/api/webhook-status":
+            log_file = "/var/log/magdrive_deploy.log"
+            recent_logs = ""
+            if os.path.exists(log_file):
+                try:
+                    with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+                        lines = f.readlines()
+                        recent_logs = "".join(lines[-30:])
+                except Exception as e:
+                    recent_logs = f"读取日志失败: {e}"
+            self.send_json(200, {
+                "success": True,
+                "webhook_path": "/api/webhook",
+                "deploy_script_exists": os.path.exists(DEPLOY_SCRIPT),
+                "server_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "recent_logs": recent_logs
+            })
+            return
+
         # 默认静态文件处理
         super().do_GET()
 
     def do_POST(self):
         path_only = self.path.split("?")[0]
+        query_string = self.path.split("?")[1] if "?" in self.path else ""
+
+        # API 路由: GitHub 自动化部署 Webhook
+        if path_only == "/api/webhook":
+            content_length = int(self.headers.get("Content-Length", 0))
+            raw_body = self.rfile.read(content_length) if content_length > 0 else b""
+
+            query_params = {}
+            if query_string:
+                for part in query_string.split("&"):
+                    if "=" in part:
+                        k, v = part.split("=", 1)
+                        query_params[k] = urllib.parse.unquote(v)
+
+            secret = get_webhook_secret()
+            sig_header = self.headers.get("X-Hub-Signature-256", "")
+            query_token = query_params.get("token", "")
+
+            # 双重鉴权: 支持 GitHub 标准 HMAC 签名 或 URL Token 参数
+            is_valid = False
+            if sig_header and verify_github_signature(raw_body, sig_header, secret):
+                is_valid = True
+            elif query_token and hmac.compare_digest(query_token, secret):
+                is_valid = True
+
+            if not is_valid:
+                print("[Webhook] 收到未授权请求: 签名或 Token 校验失败")
+                self.send_json(401, {"success": False, "message": "Unauthorized: Invalid webhook signature or token"})
+                return
+
+            event_type = self.headers.get("X-GitHub-Event", "push")
+            print(f"[Webhook] 收到合法的 GitHub Webhook 请求: 事件类型={event_type}")
+
+            # 处理 GitHub 初次建立连接时的 ping 事件
+            if event_type == "ping":
+                self.send_json(200, {
+                    "success": True,
+                    "status": "pong",
+                    "message": "GitHub Webhook ping received successfully"
+                })
+                return
+
+            # 解析载荷
+            payload = {}
+            if raw_body:
+                try:
+                    payload = json.loads(raw_body.decode("utf-8"))
+                except Exception:
+                    pass
+
+            ref = payload.get("ref", "")
+            # 只在 main/master 分支或直接测试时触发
+            if ref and ref not in ("refs/heads/main", "refs/heads/master"):
+                print(f"[Webhook] 忽略非主分支推送: {ref}")
+                self.send_json(200, {"success": True, "message": f"Ignored branch {ref}"})
+                return
+
+            # 异步执行部署脚本，防止请求超时阻塞 GitHub
+            def run_deploy():
+                try:
+                    cmd = [DEPLOY_SCRIPT] if os.access(DEPLOY_SCRIPT, os.X_OK) else ["/bin/bash", DEPLOY_SCRIPT]
+                    print(f"[Webhook Worker] 正在执行部署脚本: {' '.join(cmd)}")
+                    subprocess.run(cmd, check=True)
+                    print(f"[Webhook Worker] 部署脚本执行成功！")
+                except Exception as e:
+                    print(f"[Webhook Worker Error] 部署脚本执行异常: {e}")
+
+            threading.Thread(target=run_deploy, daemon=True).start()
+
+            self.send_json(200, {
+                "success": True,
+                "message": "Deploy task triggered successfully in background.",
+                "server_time": time.strftime("%Y-%m-%d %H:%M:%S")
+            })
+            return
+
+        # API 路由: 管理员登录认证
+        if path_only == "/api/login":
+            data = self.read_json_body()
+            username = data.get("username", "").strip()
+            password = data.get("password", "").strip()
+            creds = get_admin_credentials()
+            if username == creds.get("username") and password == creds.get("password"):
+                token = f"token_{uuid.uuid4().hex}"
+                print(f"[API Auth] 用户 {username} 登录成功")
+                self.send_json(200, {"success": True, "token": token, "message": "登录成功"})
+            else:
+                print(f"[API Auth] 用户 {username} 登录失败: 密码错误")
+                self.send_json(401, {"success": False, "message": "用户名或密码错误，请重试"})
+            return
+
+        # API 路由: 修改管理员密码
+        if path_only == "/api/change-password":
+            data = self.read_json_body()
+            old_password = data.get("old_password", "").strip()
+            new_password = data.get("new_password", "").strip()
+            creds = get_admin_credentials()
+            if old_password != creds.get("password"):
+                self.send_json(400, {"success": False, "message": "当前原密码不正确，请重新输入"})
+                return
+            if not new_password or len(new_password) < 6:
+                self.send_json(400, {"success": False, "message": "新密码长度不能少于6位"})
+                return
+            creds["password"] = new_password
+            save_admin_credentials(creds)
+            print(f"[API Auth] 管理员密码已成功修改")
+            self.send_json(200, {"success": True, "message": "密码修改成功！请使用新密码重新登录"})
+            return
 
         # API 路由: 保存 content.csv
         if path_only == "/api/save-content":
@@ -246,20 +433,59 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
+    socket.setdefaulttimeout(20)  # 20秒超时保护，杜绝慢速爬虫挂起
     port = PORT
+    is_custom_port = False
 
     # 从命令行参数获取端口
     if len(sys.argv) > 1:
         try:
             port = int(sys.argv[1])
+            is_custom_port = True
         except ValueError:
             print(f"错误: 无效的端口号 '{sys.argv[1]}'")
             print(f"用法: python {sys.argv[0]} [端口号]")
             sys.exit(1)
 
-    # 尝试启动服务器，如果端口被占用则自动递增
-    # 使用 ThreadingHTTPServer（多线程 + 端口复用）：
-    # 避免浏览器并行请求 / keep-alive 长连接把单线程服务器阻塞，导致服务假死
+    # 如果显式指定了端口（如生产环境 8090），严格锁定该端口并重试，绝不漂移端口
+    if is_custom_port:
+        httpd = None
+        for attempt in range(10):
+            try:
+                httpd = http.server.ThreadingHTTPServer(("", port), CustomHandler)
+                httpd.daemon_threads = True
+                break
+            except OSError as e:
+                if attempt < 9:
+                    print(f"端口 {port} 暂时繁忙 (处于 TIME_WAIT)，等待 1 秒后重试... ({attempt + 1}/10)")
+                    time.sleep(1)
+                else:
+                    print(f"错误: 无法绑定端口 {port}: {e}")
+                    sys.exit(1)
+
+        url = f"http://localhost:{port}"
+        print("=" * 55)
+        print(f"  🌟 迈德瑞智能装备官网高并发生产服务器已启动")
+        print(f"  👉 监听端口: {port} (多线程并发 + 防爬虫慢连接超时保护)")
+        print(f"  👉 网站前台: {url}")
+        print(f"  👉 管理后台: {url}/admin.html")
+        print(f"  👉 本地持久化 API: 已就绪 (直接写入 content.csv & images/)")
+        print(f"  按 Ctrl+C 停止服务器")
+        print("=" * 55)
+
+        if sys.stdout.isatty():
+            try:
+                webbrowser.open(url)
+            except Exception:
+                pass
+
+        try:
+            httpd.serve_forever()
+        finally:
+            httpd.server_close()
+        return
+
+    # 本地未指定端口时：尝试启动服务器，如果端口被占用则自动递增
     for attempt_port in range(port, port + 10):
         try:
             with http.server.ThreadingHTTPServer(("", attempt_port), CustomHandler) as httpd:

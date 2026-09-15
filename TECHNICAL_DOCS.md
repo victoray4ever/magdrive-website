@@ -161,6 +161,8 @@ $$\text{优先级} = \text{localStorage(本地覆盖)} \longrightarrow \text{con
 | `/api/submit-inquiry`| `POST` | `{"name": "...", "contact": "...", ...}` | `{"success": true, "message": "..."}` | 接收并追加客户询盘至 JSON |
 | `/api/inquiries` | `GET` | 无 | `{"success": true, "data": [...]}` | 获取历史询盘列表（后台使用） |
 | `/api/delete-inquiry`| `POST` | `{"id": "inq_xxxx"}` | `{"success": true, "message": "..."}` | 删除指定询盘记录 |
+| `/api/webhook` | `POST` | GitHub Webhook JSON | `{"success": true, "message": "..."}` | 接收 GitHub push/ping 事件自动拉取更新 |
+| `/api/webhook-status` | `GET` | 无 | `{"success": true, "recent_logs": "..."}` | 查看自动部署状态与最近部署日志 |
 
 ---
 
@@ -209,3 +211,26 @@ location / {
     client_max_body_size 20M; # 支持大图上传
 }
 ```
+
+---
+
+## 9. GitHub Webhook 自动化部署与安全机制
+
+系统支持在代码推送到 GitHub 仓库时，服务器全自动拉取最新代码并即时热更新前台内容。
+
+### 9.1 安全防护机制（公开仓库不泄漏密码）
+- **绝不存储服务器密码**：Webhook 为纯 HTTP 接收端点，完全由服务器自发从 GitHub 拉取公开代码，代码库与服务器交互全过程无需任何 SSH 密码。
+- **HMAC-SHA256 密文验签**：GitHub 发送的请求头包含 `X-Hub-Signature-256`。服务端通过标准库 `hmac` 和 `hashlib.sha256` 进行常数时间防时序攻击比对（`hmac.compare_digest`）。
+- **Secret 物理隔离**：通信密钥自动保存于服务器本地 `data/webhook_secret.txt`（`chmod 600`），并在 `.gitignore` 中严密排除，绝不提交至公开 Git 仓库。
+- **生产业务数据保护**：自动同步脚本采用 `rsync` 增量同步，严格排除 `data/admin.json`、`data/inquiries.json` 和 `data/webhook_secret.txt`，保证线上的管理员密码和客户真实询盘永远不会被 Git 覆盖或重置。
+
+### 9.2 自动化部署脚本执行链
+1. 监听端点：`POST /api/webhook`
+2. 校验签名合法后，开启异步守护线程调用 `/var/www/magdrive/deploy/webhook_deploy.sh`。
+3. 脚本执行：
+   ```bash
+   cd /var/www/magdrive-repo && git fetch origin main && git reset --hard origin/main
+   rsync -av --exclude 'data/admin.json' --exclude 'data/inquiries.json' /var/www/magdrive-repo/website/ /var/www/magdrive/
+   ```
+4. 若检测到 `server.py` 发生改动，平滑重启 Systemd 服务（`systemctl restart magdrive`），前端静态资源与内容修改则直接秒级生效。
+
