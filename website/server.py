@@ -7,6 +7,7 @@
 
 import http.server
 import socketserver
+import socket
 import webbrowser
 import sys
 import os
